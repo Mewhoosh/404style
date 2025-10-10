@@ -43,7 +43,9 @@ npm run dev
 # 7. Setup Frontend
 
 
-
+cd ../client
+npm install
+npm run dev
 
 
  Dostęp
