@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* System kolorów - 3 kolory bazowe */
+:root {
+  --color-primary: #0a0e27;      /* Bardzo ciemny granat - elegancja */
+  --color-secondary: #93cf08;    /* Pomarańczowo-czerwony - energia */
+  --color-accent: #f7f7f7;       /* Jasny - kontrast */
+}
+
+/* Wyliczane automatycznie */
+:root {
+  --color-primary-light: color-mix(in srgb, var(--color-primary) 60%, white);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 90%, black);
+  --color-secondary-light: color-mix(in srgb, var(--color-secondary) 70%, white);
+  --color-secondary-dark: color-mix(in srgb, var(--color-secondary) 70%, black);
+  --color-accent-light: var(--color-accent);
+  --color-accent-dark: color-mix(in srgb, var(--color-accent) 80%, gray);
+  
+  --text-primary: var(--color-primary);
+  --text-secondary: color-mix(in srgb, var(--color-primary) 60%, white);
+  --text-light: color-mix(in srgb, var(--color-primary) 40%, white);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-primary);
+  background-color: white;
+  overflow-x: hidden;
+}
+
+/* Customowe animacje */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-slide-left {
+  animation: slideInFromLeft 0.6s ease-out;
+}
+
+.animate-slide-right {
+  animation: slideInFromRight 0.6s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-accent);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-secondary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary-dark);
+}
