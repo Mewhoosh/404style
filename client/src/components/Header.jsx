@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, User, Search, Menu, X, LogOut, Settings } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X, LogOut, Settings, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
@@ -72,6 +72,18 @@ export default function Header() {
                     </div>
                     
                     <div className="p-2">
+                      {/* Dashboard (admin/moderator only) */}
+                      {(user?.role === 'admin' || user?.role === 'moderator') && (
+                        <Link
+                          to="/dashboard"
+                          className="flex items-center gap-3 px-4 py-3 text-primary hover:bg-gray-100 rounded-lg transition-all"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <LayoutDashboard size={20} />
+                          <span className="font-medium">Dashboard</span>
+                        </Link>
+                      )}
+
                       <Link
                         to="/profile"
                         className="flex items-center gap-3 px-4 py-3 text-primary hover:bg-gray-100 rounded-lg transition-all"
@@ -101,8 +113,7 @@ export default function Header() {
                 className="hover:text-secondary transition-colors hover:scale-110 transform flex items-center gap-2"
               >
                 <User size={26} strokeWidth={1.5} />
-                {/* <span className="hidden md:block font-medium">Login</span> */}
-                <span className="hidden md:block font-medium"></span>
+                <span className="hidden md:block font-medium">Login</span>
               </Link>
             )}
 
@@ -174,7 +185,14 @@ export default function Header() {
               
               {isAuthenticated() && (
                 <>
-                  <li className="border-t border-primary-light pt-4 mt-4">
+                  {(user?.role === 'admin' || user?.role === 'moderator') && (
+                    <li className="border-t border-primary-light pt-4 mt-4">
+                      <Link to="/dashboard" className="block hover:text-secondary transition-colors">
+                        Dashboard
+                      </Link>
+                    </li>
+                  )}
+                  <li>
                     <Link to="/profile" className="block hover:text-secondary transition-colors">
                       Profile Settings
                     </Link>

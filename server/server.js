@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const session = require('express-session');
 const passport = require('./config/passport');
 const { syncDatabase } = require('./models');
+const path = require('path');
 
 dotenv.config();
 
@@ -30,6 +31,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Serve static files (uploaded images)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: '404 Style API is running!' });
@@ -37,6 +41,10 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/products', require('./routes/products'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/products', require('./routes/products'));
+app.use('/api/stats', require('./routes/stats'));
 
 // Sync database and start server
 const PORT = process.env.PORT || 5000;

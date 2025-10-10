@@ -16,16 +16,41 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Load user from localStorage on mount
+  // Load user from API on mount (fresh data!)
   useEffect(() => {
-    const loadUser = () => {
+    const loadUser = async () => {
       const token = localStorage.getItem('token');
-      const savedUser = localStorage.getItem('user');
 
-      if (token && savedUser) {
-        setUser(JSON.parse(savedUser));
+      if (!token) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        // Fetch fresh user data from API
+        const response = await fetch('http://localhost:5000/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data.user);
+          // Update localStorage with fresh data
+          localStorage.setItem('user', JSON.stringify(data.user));
+        } else {
+          // Token invalid, clear everything
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      } catch (error) {
+        console.error('Load user error:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadUser();

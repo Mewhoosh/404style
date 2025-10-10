@@ -55,6 +55,12 @@ const User = sequelize.define('User', {
   oauthId: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  assignedCategories: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Array of category IDs for moderators'
   }
 }, {
   timestamps: true,
