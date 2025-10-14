@@ -181,7 +181,7 @@ export default function Login() {
                       value={formData.lastName}
                       onChange={handleChange}
                       className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-secondary focus:outline-none transition-all"
-                      placeholder="Doe"
+                      placeholder="Kowalski"
                       required={!isLogin}
                     />
                   </div>

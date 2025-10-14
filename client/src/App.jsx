@@ -7,7 +7,7 @@ import Login from './pages/Login.jsx';
 import AuthCallback from './pages/AuthCallback.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import ProductForm from './pages/ProductForm.jsx';
-
+import ProfileSettings from './pages/ProfileSettings.jsx';
 function App() {
   return (
     <Router>
@@ -21,6 +21,7 @@ function App() {
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/products/new" element={<ProductForm />} />
+              <Route path="/profile" element={<ProfileSettings />} />
             </Routes>
           </main>
           <Footer />

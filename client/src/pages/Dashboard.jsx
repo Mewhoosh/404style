@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
 import { Package, Users, FolderTree, Palette, Image, MessageSquare, ShoppingCart } from 'lucide-react';
+import ThemeEditor from '../components/ThemeEditor';
 
 export default function Dashboard() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -201,9 +202,13 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'colors' && (
-          <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
-            <h2 className="text-2xl font-bold text-primary mb-4">Site Color Customization</h2>
-            <p className="text-text-secondary">Color theme editor coming soon...</p>
+          <div>
+            <div className="bg-white rounded-xl p-8 border-2 border-gray-200 mb-6">
+              <h2 className="text-2xl font-bold text-primary mb-2">Site Color Customization</h2>
+              <p className="text-text-secondary mb-6">Create and manage color themes for your store</p>
+              
+              <ThemeEditor />
+            </div>
           </div>
         )}
 

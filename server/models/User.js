@@ -56,6 +56,14 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true
   },
+  selectedThemeId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'themes',
+      key: 'id'
+    }
+  },
   assignedCategories: {
     type: DataTypes.JSON,
     allowNull: true,

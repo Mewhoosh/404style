@@ -40,11 +40,11 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/products', require('./routes/products'));
+// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/stats', require('./routes/stats'));
+app.use('/api/themes', require('./routes/themes')); 
 
 // Sync database and start server
 const PORT = process.env.PORT || 5000;
