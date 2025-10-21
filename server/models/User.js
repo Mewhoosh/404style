@@ -1,91 +1,65 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
 const bcrypt = require('bcryptjs');
 
-const User = sequelize.define('User', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-    validate: {
-      isEmail: true
+module.exports = (sequelize) => {
+  const User = sequelize.define('User', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true
+      }
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    role: {
+      type: DataTypes.ENUM('user', 'moderator', 'admin'),
+      defaultValue: 'user'
+    },
+    googleId: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    githubId: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  firstName: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  lastName: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  role: {
-    type: DataTypes.ENUM('user', 'moderator', 'admin'),
-    defaultValue: 'user'
-  },
-  phone: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  address: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  reputationPoints: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
-  },
-  rank: {
-    type: DataTypes.STRING,
-    defaultValue: 'Newbie'
-  },
-  oauthProvider: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  oauthId: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  selectedThemeId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: 'themes',
-      key: 'id'
+  }, {
+    tableName: 'users',
+    timestamps: true,
+    hooks: {
+      beforeCreate: async (user) => {
+        if (user.password) {
+          user.password = await bcrypt.hash(user.password, 10);
+        }
+      },
+      beforeUpdate: async (user) => {
+        if (user.changed('password')) {
+          user.password = await bcrypt.hash(user.password, 10);
+        }
+      }
     }
-  },
-  assignedCategories: {
-    type: DataTypes.JSON,
-    allowNull: true,
-    defaultValue: null,
-    comment: 'Array of category IDs for moderators'
-  }
-}, {
-  timestamps: true,
-  tableName: 'users'
-});
+  });
 
-// Hash password before saving
-User.beforeCreate(async (user) => {
-  if (user.password) {
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
-  }
-});
+  User.prototype.comparePassword = async function(password) {
+    return await bcrypt.compare(password, this.password);
+  };
 
-// Method to compare password
-User.prototype.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  return User;
 };
-
-module.exports = User;

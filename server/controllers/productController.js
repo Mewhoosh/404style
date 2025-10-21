@@ -1,77 +1,108 @@
 const { Product, ProductImage, Category, User } = require('../models');
-const { processImage } = require('../utils/imageProcessor');
+const { Op } = require('sequelize');
+const multer = require('multer');
 const path = require('path');
 
-// Get all products (public)
+// Configure multer for image upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/products/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|gif|webp/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Only image files are allowed!'));
+  }
+}).array('images', 5);
+
+// Helper function to get all subcategory IDs recursively
+const getAllSubcategoryIds = async (categoryId) => {
+  const ids = [categoryId];
+  
+  const getChildren = async (parentId) => {
+    const children = await Category.findAll({
+      where: { parentId },
+      attributes: ['id']
+    });
+    
+    for (const child of children) {
+      ids.push(child.id);
+      await getChildren(child.id);
+    }
+  };
+  
+  await getChildren(categoryId);
+  return ids;
+};
+
+// Get all products
 exports.getAllProducts = async (req, res) => {
   try {
-    const { categoryId, search, sort = 'createdAt', order = 'DESC', page = 1, limit = 12 } = req.query;
-
-    const where = { status: 'approved' };
+    const { categoryId, status, search } = req.query;
+    console.log('🔍 Query params:', { categoryId, status, search });
     
-    if (categoryId) where.categoryId = categoryId;
-    if (search) {
-      where[Op.or] = [
-        { name: { [Op.like]: `%${search}%` } },
-        { description: { [Op.like]: `%${search}%` } }
-      ];
+    const where = {};
+
+    // Category filter - include subcategories
+    if (categoryId) {
+      const categoryIds = await getAllSubcategoryIds(parseInt(categoryId));
+      console.log('📁 Category IDs (with subcategories):', categoryIds);
+      where.categoryId = { [Op.in]: categoryIds };
     }
 
-    const offset = (page - 1) * limit;
+    // Status filter
+    if (status) {
+      where.status = status;
+      console.log('✅ Status filter:', status);
+    }
 
-    const { rows: products, count } = await Product.findAndCountAll({
+    // Search filter
+    if (search) {
+      where.name = { [Op.like]: `%${search}%` };
+    }
+
+    console.log('🎯 Final WHERE clause:', JSON.stringify(where, null, 2));
+
+    const products = await Product.findAll({
       where,
       include: [
-        {
-          model: ProductImage,
-          as: 'images',
-          where: { isMain: true },
-          required: false
-        },
-        {
-          model: Category,
-          as: 'category',
-          attributes: ['id', 'name', 'slug']
-        }
+        { model: Category, as: 'category' },
+        { model: ProductImage, as: 'images' },
+        { model: User, as: 'creator', attributes: ['id', 'firstName', 'lastName', 'email'] }
       ],
-      order: [[sort, order]],
-      limit: parseInt(limit),
-      offset: parseInt(offset)
+      order: [['createdAt', 'DESC']]
     });
 
-    res.json({
-      products,
-      pagination: {
-        total: count,
-        page: parseInt(page),
-        pages: Math.ceil(count / limit)
-      }
-    });
+    console.log('📦 Products found:', products.length);
+    res.json(products);
   } catch (error) {
     console.error('Get products error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-// Get single product (public)
+// Get single product
 exports.getProduct = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id, {
       include: [
-        {
-          model: ProductImage,
-          as: 'images',
-          order: [['orderIndex', 'ASC']]
-        },
-        {
-          model: Category,
-          as: 'category'
-        },
-        {
-          model: User,
-          as: 'creator',
-          attributes: ['id', 'firstName', 'lastName']
-        }
+        { model: Category, as: 'category' },
+        { model: ProductImage, as: 'images' },
+        { model: User, as: 'creator', attributes: ['id', 'firstName', 'lastName', 'email'] }
       ]
     });
 
@@ -86,107 +117,146 @@ exports.getProduct = async (req, res) => {
   }
 };
 
-// Create product (moderator/admin)
+// Create product
 exports.createProduct = async (req, res) => {
-  try {
-    const { name, description, price, stock, categoryId } = req.body;
-
-    // Check if moderator has access to this category
-    if (req.user.role === 'moderator') {
-      const assignedCategories = req.user.assignedCategories || [];
-      if (!assignedCategories.includes(parseInt(categoryId))) {
-        return res.status(403).json({ 
-          message: 'You are not assigned to this category' 
-        });
-      }
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
     }
 
-    // Create product
-    const product = await Product.create({
-      name,
-      description,
-      price,
-      stock,
-      categoryId,
-      createdBy: req.userId,
-      status: req.user.role === 'admin' ? 'approved' : 'pending'
-    });
+    try {
+      const { name, description, price, stock, categoryId, status } = req.body;
 
-    // Process uploaded images
-    if (req.files && req.files.length > 0) {
-      for (let i = 0; i < req.files.length; i++) {
-        const file = req.files[i];
-        const { imageUrl, thumbnailUrl } = await processImage(file.path);
-
-        await ProductImage.create({
-          productId: product.id,
-          imageUrl,
-          thumbnailUrl,
-          orderIndex: i,
-          isMain: i === 0
-        });
+      // Validate category
+      const category = await Category.findByPk(categoryId);
+      if (!category) {
+        return res.status(404).json({ message: 'Category not found' });
       }
-    }
 
-    res.status(201).json({
-      message: 'Product created successfully',
-      product
-    });
-  } catch (error) {
-    console.error('Create product error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
+      // Create product
+      const product = await Product.create({
+        name,
+        description,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+        categoryId,
+        status: status || 'draft',
+        createdBy: req.userId
+      });
+
+      // Create product images
+      if (req.files && req.files.length > 0) {
+        const imagePromises = req.files.map((file, index) => {
+          return ProductImage.create({
+            productId: product.id,
+            imageUrl: `/uploads/products/${file.filename}`,
+            isPrimary: index === 0
+          });
+        });
+        await Promise.all(imagePromises);
+      }
+
+      // Fetch product with relations
+      const createdProduct = await Product.findByPk(product.id, {
+        include: [
+          { model: Category, as: 'category' },
+          { model: ProductImage, as: 'images' }
+        ]
+      });
+
+      res.status(201).json({
+        message: 'Product created successfully',
+        product: createdProduct
+      });
+    } catch (error) {
+      console.error('Create product error:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  });
 };
 
-// Update product (moderator/admin)
+// Update product
 exports.updateProduct = async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
     }
 
-    // Check access rights
-    if (req.user.role === 'moderator') {
-      const assignedCategories = req.user.assignedCategories || [];
-      if (!assignedCategories.includes(product.categoryId)) {
-        return res.status(403).json({ 
-          message: 'You are not assigned to this category' 
-        });
+    try {
+      const product = await Product.findByPk(req.params.id);
+
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
       }
+
+      const { name, description, price, stock, categoryId, status } = req.body;
+
+      // Validate category if changed
+      if (categoryId && categoryId !== product.categoryId) {
+        const category = await Category.findByPk(categoryId);
+        if (!category) {
+          return res.status(404).json({ message: 'Category not found' });
+        }
+      }
+
+      // Update product
+      await product.update({
+        name: name || product.name,
+        description: description !== undefined ? description : product.description,
+        price: price ? parseFloat(price) : product.price,
+        stock: stock !== undefined ? parseInt(stock) : product.stock,
+        categoryId: categoryId || product.categoryId,
+        status: status || product.status
+      });
+
+      // Add new images if uploaded
+      if (req.files && req.files.length > 0) {
+        const existingImages = await ProductImage.count({ where: { productId: product.id } });
+        
+        const imagePromises = req.files.map((file, index) => {
+          return ProductImage.create({
+            productId: product.id,
+            imageUrl: `/uploads/products/${file.filename}`,
+            isPrimary: existingImages === 0 && index === 0
+          });
+        });
+        await Promise.all(imagePromises);
+      }
+
+      // Fetch updated product with relations
+      const updatedProduct = await Product.findByPk(product.id, {
+        include: [
+          { model: Category, as: 'category' },
+          { model: ProductImage, as: 'images' }
+        ]
+      });
+
+      res.json({
+        message: 'Product updated successfully',
+        product: updatedProduct
+      });
+    } catch (error) {
+      console.error('Update product error:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
     }
-
-    const { name, description, price, stock, categoryId, status } = req.body;
-
-    await product.update({
-      name: name || product.name,
-      description: description || product.description,
-      price: price || product.price,
-      stock: stock || product.stock,
-      categoryId: categoryId || product.categoryId,
-      status: status || product.status
-    });
-
-    res.json({
-      message: 'Product updated successfully',
-      product
-    });
-  } catch (error) {
-    console.error('Update product error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
+  });
 };
 
-// Delete product (admin only)
+// Delete product
 exports.deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = await Product.findByPk(req.params.id, {
+      include: [{ model: ProductImage, as: 'images' }]
+    });
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
+    // Delete associated images from database
+    await ProductImage.destroy({ where: { productId: product.id } });
+
+    // Delete product
     await product.destroy();
 
     res.json({ message: 'Product deleted successfully' });
@@ -196,38 +266,53 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-// Get products for moderator (only their categories)
-exports.getModeratorProducts = async (req, res) => {
+// Delete product image
+exports.deleteProductImage = async (req, res) => {
   try {
-    const assignedCategories = req.user.assignedCategories || [];
+    const { productId, imageId } = req.params;
 
-    if (req.user.role === 'admin') {
-      // Admin sees all
-      const products = await Product.findAll({
-        include: [
-          { model: Category, as: 'category' },
-          { model: ProductImage, as: 'images' }
-        ],
-        order: [['createdAt', 'DESC']]
-      });
-      return res.json(products);
-    }
-
-    // Moderator sees only their categories
-    const products = await Product.findAll({
-      where: {
-        categoryId: assignedCategories
-      },
-      include: [
-        { model: Category, as: 'category' },
-        { model: ProductImage, as: 'images' }
-      ],
-      order: [['createdAt', 'DESC']]
+    const image = await ProductImage.findOne({
+      where: { id: imageId, productId }
     });
 
-    res.json(products);
+    if (!image) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+
+    await image.destroy();
+
+    res.json({ message: 'Image deleted successfully' });
   } catch (error) {
-    console.error('Get moderator products error:', error);
+    console.error('Delete image error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Set primary image
+exports.setPrimaryImage = async (req, res) => {
+  try {
+    const { productId, imageId } = req.params;
+
+    // Set all images to non-primary
+    await ProductImage.update(
+      { isPrimary: false },
+      { where: { productId } }
+    );
+
+    // Set selected image as primary
+    const image = await ProductImage.findOne({
+      where: { id: imageId, productId }
+    });
+
+    if (!image) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+
+    await image.update({ isPrimary: true });
+
+    res.json({ message: 'Primary image updated' });
+  } catch (error) {
+    console.error('Set primary image error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

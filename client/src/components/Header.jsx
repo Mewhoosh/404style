@@ -1,12 +1,29 @@
 import { Link } from 'react-router-dom';
 import { ShoppingCart, User, Search, Menu, X, LogOut, Settings, LayoutDashboard } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
   const { user, logout, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/categories');
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
 
   return (
     <header className="bg-primary text-accent sticky top-0 z-50 backdrop-blur-sm bg-opacity-95">
@@ -113,8 +130,7 @@ export default function Header() {
                 className="hover:text-secondary transition-colors hover:scale-110 transform flex items-center gap-2"
               >
                 <User size={26} strokeWidth={1.5} />
-                <span className="hidden md:block font-medium"></span>
-                {/* <span className="hidden md:block font-medium">Login</span> */}
+                <span className="hidden md:block font-medium">Login</span>
               </Link>
             )}
 
@@ -125,7 +141,7 @@ export default function Header() {
             >
               <ShoppingCart size={26} strokeWidth={1.5} />
               <span className="absolute -top-2 -right-2 bg-secondary text-primary text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold group-hover:scale-125 transition-transform">
-                3
+                0
               </span>
             </Link>
             
@@ -139,7 +155,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - DYNAMICZNE KATEGORIE */}
         <nav className="hidden md:block border-t border-primary-light py-4">
           <ul className="flex gap-10 text-sm font-medium tracking-wide">
             <li>
@@ -148,24 +164,20 @@ export default function Header() {
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-secondary group-hover:w-full transition-all"></span>
               </Link>
             </li>
-            <li>
-              <Link to="/men" className="hover:text-secondary transition-colors relative group">
-                MEN
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-secondary group-hover:w-full transition-all"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/women" className="hover:text-secondary transition-colors relative group">
-                WOMEN
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-secondary group-hover:w-full transition-all"></span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/accessories" className="hover:text-secondary transition-colors relative group">
-                ACCESSORIES
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-secondary group-hover:w-full transition-all"></span>
-              </Link>
-            </li>
+            
+            {/* Dynamiczne kategorie z bazy */}
+            {categories.map(category => (
+              <li key={category.id}>
+                <Link 
+                  to={`/category/${category.slug}`} 
+                  className="hover:text-secondary transition-colors relative group uppercase"
+                >
+                  {category.name}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-secondary group-hover:w-full transition-all"></span>
+                </Link>
+              </li>
+            ))}
+            
             <li className="ml-auto">
               <Link to="/sale" className="text-secondary font-bold hover:text-secondary-light transition-colors">
                 SALE -50%
@@ -179,28 +191,50 @@ export default function Header() {
           <nav className="md:hidden py-4 border-t border-primary-light animate-slide-left">
             <ul className="space-y-4 text-sm font-medium">
               <li><Link to="/" className="block hover:text-secondary transition-colors">HOME</Link></li>
-              <li><Link to="/men" className="block hover:text-secondary transition-colors">MEN</Link></li>
-              <li><Link to="/women" className="block hover:text-secondary transition-colors">WOMEN</Link></li>
-              <li><Link to="/accessories" className="block hover:text-secondary transition-colors">ACCESSORIES</Link></li>
+              
+              {/* Dynamiczne kategorie w mobile */}
+              {categories.map(category => (
+                <li key={category.id}>
+                  <Link 
+                    to={`/category/${category.slug}`} 
+                    className="block hover:text-secondary transition-colors uppercase"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
+              
               <li><Link to="/sale" className="block text-secondary font-bold">SALE -50%</Link></li>
               
               {isAuthenticated() && (
                 <>
                   {(user?.role === 'admin' || user?.role === 'moderator') && (
                     <li className="border-t border-primary-light pt-4 mt-4">
-                      <Link to="/dashboard" className="block hover:text-secondary transition-colors">
+                      <Link 
+                        to="/dashboard" 
+                        className="block hover:text-secondary transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
                         Dashboard
                       </Link>
                     </li>
                   )}
                   <li>
-                    <Link to="/profile" className="block hover:text-secondary transition-colors">
+                    <Link 
+                      to="/profile" 
+                      className="block hover:text-secondary transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       Profile Settings
                     </Link>
                   </li>
                   <li>
                     <button
-                      onClick={logout}
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
                       className="text-red-500 hover:text-red-400 transition-colors"
                     >
                       Logout

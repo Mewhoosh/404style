@@ -10,7 +10,7 @@ export default function ThemeEditor() {
   const [toast, setToast] = useState(null);
   const [previewColors, setPreviewColors] = useState({
     colorPrimary: '#0a0e27',
-    colorSecondary: '#ff6b35',
+    colorSecondary: '#93cf08',
     colorAccent: '#f7f7f7'
   });
 
@@ -24,9 +24,14 @@ export default function ThemeEditor() {
 
   const fetchThemes = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/themes');
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/themes', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('📦 Themes loaded:', data);
         setThemes(data);
       }
     } catch (error) {
@@ -42,7 +47,7 @@ export default function ThemeEditor() {
       id: null,
       name: '',
       colorPrimary: '#0a0e27',
-      colorSecondary: '#ff6b35',
+      colorSecondary: '#93cf08',
       colorAccent: '#f7f7f7',
       isDefault: false
     });
@@ -58,7 +63,6 @@ export default function ThemeEditor() {
   };
 
   const handleSaveTheme = async () => {
-    // Validation
     if (!editingTheme.name.trim()) {
       showToast('Please enter a theme name', 'error');
       return;
@@ -133,7 +137,7 @@ export default function ThemeEditor() {
     document.documentElement.style.setProperty('--color-primary', previewColors.colorPrimary);
     document.documentElement.style.setProperty('--color-secondary', previewColors.colorSecondary);
     document.documentElement.style.setProperty('--color-accent', previewColors.colorAccent);
-    showToast('Preview applied! Refresh to reset.', 'success');
+    showToast('Preview applied live!', 'success');
   };
 
   if (loading) {
@@ -147,7 +151,6 @@ export default function ThemeEditor() {
 
   return (
     <div>
-      {/* Toast Notification */}
       {toast && (
         <Toast
           message={toast.message}
@@ -164,7 +167,6 @@ export default function ThemeEditor() {
               {editingTheme.id ? 'Edit Theme' : 'Create New Theme'}
             </h3>
 
-            {/* Theme Name */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-primary mb-2">
                 Theme Name *
@@ -178,7 +180,6 @@ export default function ThemeEditor() {
               />
             </div>
 
-            {/* Color Pickers */}
             <div className="grid md:grid-cols-3 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-semibold text-primary mb-2">
@@ -259,7 +260,6 @@ export default function ThemeEditor() {
               </div>
             </div>
 
-            {/* Preview Button */}
             <button
               onClick={applyPreview}
               className="w-full mb-4 px-4 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-all"
@@ -267,21 +267,9 @@ export default function ThemeEditor() {
               Preview Colors Live
             </button>
 
-            {/* Default Checkbox */}
-            <label className="flex items-center gap-2 mb-6 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={editingTheme.isDefault}
-                onChange={(e) => setEditingTheme({ ...editingTheme, isDefault: e.target.checked })}
-                className="w-5 h-5"
-              />
-              <span className="text-sm font-medium">Set as default theme</span>
-            </label>
-
-            {/* Buttons */}
             <div className="flex gap-4">
               <button
-                onClick={handleSaveTheme}
+                onClick={() => setEditingTheme(null)}
                 disabled={saving}
                 className="flex-1 bg-secondary text-primary px-6 py-3 rounded-lg font-bold hover:bg-secondary-light transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
@@ -309,7 +297,6 @@ export default function ThemeEditor() {
         </div>
       )}
 
-      {/* Create Button */}
       <button
         onClick={handleCreateTheme}
         className="mb-6 bg-secondary text-primary px-6 py-3 rounded-lg font-bold hover:bg-secondary-light transition-all flex items-center gap-2"
@@ -318,7 +305,6 @@ export default function ThemeEditor() {
         Create New Theme
       </button>
 
-      {/* Themes List */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {themes.map((theme) => (
           <div
@@ -352,7 +338,6 @@ export default function ThemeEditor() {
               </div>
             </div>
 
-            {/* Color Swatches */}
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <div

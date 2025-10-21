@@ -4,14 +4,14 @@ const themeController = require('../controllers/themeController');
 const { authMiddleware, isAdmin } = require('../middleware/auth');
 
 // Public routes
-router.get('/', themeController.getAllThemes);
-router.get('/:id', themeController.getTheme);
+router.get('/default', themeController.getDefaultTheme);
 
-// User routes (authenticated)
-router.get('/user/current', authMiddleware, themeController.getUserTheme);
-router.post('/user/select', authMiddleware, themeController.setUserTheme);
+// Authenticated user routes
+router.get('/user', authMiddleware, themeController.getUserTheme);
+router.post('/user/preference', authMiddleware, themeController.setUserTheme);
 
-// Admin only routes
+// Admin routes
+router.get('/', authMiddleware, isAdmin, themeController.getAllThemes);
 router.post('/', authMiddleware, isAdmin, themeController.createTheme);
 router.put('/:id', authMiddleware, isAdmin, themeController.updateTheme);
 router.delete('/:id', authMiddleware, isAdmin, themeController.deleteTheme);

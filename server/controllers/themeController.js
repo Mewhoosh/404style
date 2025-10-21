@@ -1,6 +1,6 @@
-const { Theme, User } = require('../models');
+const { Theme, UserThemePreference } = require('../models');
 
-// Get all themes
+// Get all themes (admin only)
 exports.getAllThemes = async (req, res) => {
   try {
     const themes = await Theme.findAll({
@@ -13,16 +13,87 @@ exports.getAllThemes = async (req, res) => {
   }
 };
 
-// Get single theme
-exports.getTheme = async (req, res) => {
+// Get default theme (public)
+exports.getDefaultTheme = async (req, res) => {
   try {
-    const theme = await Theme.findByPk(req.params.id);
+    let theme = await Theme.findOne({ where: { isDefault: true } });
+    
+    if (!theme) {
+      // Create default theme if none exists
+      theme = await Theme.create({
+        name: 'Default',
+        colorPrimary: '#0a0e27',
+        colorSecondary: '#93cf08',
+        colorAccent: '#f7f7f7',
+        isDefault: true
+      });
+    }
+    
+    res.json(theme);
+  } catch (error) {
+    console.error('Get default theme error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Get user's active theme (logged in users)
+exports.getUserTheme = async (req, res) => {
+  try {
+    // Check if user has preference
+    const preference = await UserThemePreference.findOne({
+      where: { userId: req.userId },
+      include: [{ model: Theme, as: 'theme' }]
+    });
+
+    if (preference && preference.theme) {
+      return res.json(preference.theme);
+    }
+
+    // Return default theme
+    let theme = await Theme.findOne({ where: { isDefault: true } });
+    
+    if (!theme) {
+      theme = await Theme.create({
+        name: 'Default',
+        colorPrimary: '#0a0e27',
+        colorSecondary: '#93cf08',
+        colorAccent: '#f7f7f7',
+        isDefault: true
+      });
+    }
+
+    res.json(theme);
+  } catch (error) {
+    console.error('Get user theme error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Set user's theme preference
+exports.setUserTheme = async (req, res) => {
+  try {
+    const { themeId } = req.body;
+
+    // Verify theme exists
+    const theme = await Theme.findByPk(themeId);
     if (!theme) {
       return res.status(404).json({ message: 'Theme not found' });
     }
-    res.json(theme);
+
+    // Update or create preference
+    const [preference, created] = await UserThemePreference.upsert({
+      userId: req.userId,
+      themeId: themeId
+    }, {
+      returning: true
+    });
+
+    res.json({
+      message: 'Theme preference updated',
+      theme
+    });
   } catch (error) {
-    console.error('Get theme error:', error);
+    console.error('Set user theme error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -30,19 +101,14 @@ exports.getTheme = async (req, res) => {
 // Create theme (admin only)
 exports.createTheme = async (req, res) => {
   try {
-    const { name, colorPrimary, colorSecondary, colorAccent, isDefault } = req.body;
-
-    // If this is default, unset other defaults
-    if (isDefault) {
-      await Theme.update({ isDefault: false }, { where: { isDefault: true } });
-    }
+    const { name, colorPrimary, colorSecondary, colorAccent } = req.body;
 
     const theme = await Theme.create({
       name,
       colorPrimary,
       colorSecondary,
       colorAccent,
-      isDefault: isDefault || false,
+      isDefault: false,
       createdBy: req.userId
     });
 
@@ -65,19 +131,13 @@ exports.updateTheme = async (req, res) => {
       return res.status(404).json({ message: 'Theme not found' });
     }
 
-    const { name, colorPrimary, colorSecondary, colorAccent, isDefault } = req.body;
-
-    // If this is default, unset other defaults
-    if (isDefault && !theme.isDefault) {
-      await Theme.update({ isDefault: false }, { where: { isDefault: true } });
-    }
+    const { name, colorPrimary, colorSecondary, colorAccent } = req.body;
 
     await theme.update({
       name: name || theme.name,
       colorPrimary: colorPrimary || theme.colorPrimary,
       colorSecondary: colorSecondary || theme.colorSecondary,
-      colorAccent: colorAccent || theme.colorAccent,
-      isDefault: isDefault !== undefined ? isDefault : theme.isDefault
+      colorAccent: colorAccent || theme.colorAccent
     });
 
     res.json({
@@ -103,53 +163,13 @@ exports.deleteTheme = async (req, res) => {
       return res.status(400).json({ message: 'Cannot delete default theme' });
     }
 
+    // Delete user preferences for this theme
+    await UserThemePreference.destroy({ where: { themeId: theme.id } });
+
     await theme.destroy();
     res.json({ message: 'Theme deleted successfully' });
   } catch (error) {
     console.error('Delete theme error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
-// Set user's selected theme
-exports.setUserTheme = async (req, res) => {
-  try {
-    const { themeId } = req.body;
-    
-    const theme = await Theme.findByPk(themeId);
-    if (!theme) {
-      return res.status(404).json({ message: 'Theme not found' });
-    }
-
-    const user = await User.findByPk(req.userId);
-    await user.update({ selectedThemeId: themeId });
-
-    res.json({
-      message: 'Theme applied successfully',
-      theme
-    });
-  } catch (error) {
-    console.error('Set user theme error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
-// Get user's theme
-exports.getUserTheme = async (req, res) => {
-  try {
-    const user = await User.findByPk(req.userId, {
-      include: [{ model: Theme, as: 'selectedTheme' }]
-    });
-
-    if (!user.selectedTheme) {
-      // Return default theme
-      const defaultTheme = await Theme.findOne({ where: { isDefault: true } });
-      return res.json(defaultTheme);
-    }
-
-    res.json(user.selectedTheme);
-  } catch (error) {
-    console.error('Get user theme error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

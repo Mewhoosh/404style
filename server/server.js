@@ -1,12 +1,13 @@
+// ✅ DOTENV NA SAMYM POCZĄTKU!
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const session = require('express-session');
 const passport = require('./config/passport');
 const { syncDatabase } = require('./models');
 const path = require('path');
-
-dotenv.config();
 
 const app = express();
 
@@ -40,17 +41,16 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/stats', require('./routes/stats'));
-app.use('/api/themes', require('./routes/themes')); 
+app.use('/api/themes', require('./routes/themes'));
+app.use('/api/categories', require('./routes/categories'));
 
 // Sync database and start server
 const PORT = process.env.PORT || 5000;
-
 syncDatabase().then(() => {
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
   });
 });

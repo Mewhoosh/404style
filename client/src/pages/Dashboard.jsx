@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import { Package, Users, FolderTree, Palette, Image, MessageSquare, ShoppingCart } from 'lucide-react';
 import ThemeEditor from '../components/ThemeEditor';
+import CategoryManager from '../components/CategoryManager';
+import ProductManager from '../components/ProductManager';
 
 export default function Dashboard() {
   const { user, loading, isAuthenticated } = useAuth();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({
     products: 0,
@@ -32,6 +35,13 @@ export default function Dashboard() {
 
     if (user) fetchStats();
   }, [user]);
+
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (loading) {
     return (
@@ -103,7 +113,6 @@ export default function Dashboard() {
           <div>
             {/* Stats */}
             <div className="grid md:grid-cols-4 gap-6 mb-8">
-              {/* Products */}
               <div className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-primary transition-all hover:shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center">
@@ -115,7 +124,6 @@ export default function Dashboard() {
                 <p className="text-sm text-text-secondary">Total products</p>
               </div>
 
-              {/* Users (admin only) */}
               {isAdmin && (
                 <div className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-primary transition-all hover:shadow-lg">
                   <div className="flex items-center justify-between mb-4">
@@ -129,7 +137,6 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Categories (admin only) */}
               {isAdmin && (
                 <div className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-primary transition-all hover:shadow-lg">
                   <div className="flex items-center justify-between mb-4">
@@ -143,7 +150,6 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Revenue */}
               <div className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-secondary transition-all hover:shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-14 h-14 bg-secondary rounded-xl flex items-center justify-center">
@@ -156,7 +162,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Actions */}
+            {/* Quick Actions - TWOJA WERSJA */}
             <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
               <h2 className="text-xl font-bold text-primary mb-4">Quick Actions</h2>
               <div className="grid md:grid-cols-3 gap-4">
@@ -181,16 +187,24 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'products' && (
-          <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
-            <h2 className="text-2xl font-bold text-primary mb-4">Manage Products</h2>
-            <p className="text-text-secondary">Product management coming soon...</p>
+          <div>
+            <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
+              <h2 className="text-2xl font-bold text-primary mb-2">Manage Products</h2>
+              <p className="text-text-secondary mb-6">View, edit, and manage your products</p>
+              
+              <ProductManager />
+            </div>
           </div>
         )}
 
         {activeTab === 'categories' && (
-          <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
-            <h2 className="text-2xl font-bold text-primary mb-4">Manage Categories</h2>
-            <p className="text-text-secondary">Category management coming soon...</p>
+          <div>
+            <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
+              <h2 className="text-2xl font-bold text-primary mb-2">Manage Categories</h2>
+              <p className="text-text-secondary mb-6">Organize your product categories</p>
+              
+              <CategoryManager />
+            </div>
           </div>
         )}
 
