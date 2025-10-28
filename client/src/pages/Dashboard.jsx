@@ -5,6 +5,7 @@ import { Package, Users, FolderTree, Palette, Image, MessageSquare, ShoppingCart
 import ThemeEditor from '../components/ThemeEditor';
 import CategoryManager from '../components/CategoryManager';
 import ProductManager from '../components/ProductManager';
+import SliderManager from '../components/SliderManager';
 
 export default function Dashboard() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -65,14 +66,13 @@ export default function Dashboard() {
       { id: 'users', label: 'Users', icon: Users },
       { id: 'colors', label: 'Site Colors', icon: Palette },
     ] : []),
-    { id: 'gallery', label: 'Gallery', icon: Image },
+    { id: 'gallery', label: 'Sliders', icon: Image },
     { id: 'reviews', label: 'Reviews', icon: MessageSquare },
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b-2 border-gray-200">
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-3xl font-black text-primary">
@@ -83,7 +83,6 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Tabs */}
         <div className="container mx-auto px-4">
           <div className="flex gap-2 overflow-x-auto">
             {tabs.map(tab => {
@@ -107,11 +106,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="container mx-auto px-4 py-8">
         {activeTab === 'overview' && (
           <div>
-            {/* Stats */}
             <div className="grid md:grid-cols-4 gap-6 mb-8">
               <div className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-primary transition-all hover:shadow-lg">
                 <div className="flex items-center justify-between mb-4">
@@ -162,7 +159,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Actions - TWOJA WERSJA */}
             <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
               <h2 className="text-xl font-bold text-primary mb-4">Quick Actions</h2>
               <div className="grid md:grid-cols-3 gap-4">
@@ -173,9 +169,12 @@ export default function Dashboard() {
                   <Package size={24} />
                   Add New Product
                 </Link>
-                <button className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:text-primary transition-all font-semibold">
+                <button 
+                  onClick={() => setActiveTab('gallery')}
+                  className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:text-primary transition-all font-semibold"
+                >
                   <Image size={24} />
-                  Manage Gallery
+                  Manage Sliders
                 </button>
                 <button className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:text-primary transition-all font-semibold">
                   <MessageSquare size={24} />
@@ -227,9 +226,13 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'gallery' && (
-          <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
-            <h2 className="text-2xl font-bold text-primary mb-4">Gallery & Sliders</h2>
-            <p className="text-text-secondary">Gallery management coming soon...</p>
+          <div>
+            <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
+              <h2 className="text-2xl font-bold text-primary mb-2">Slider Management</h2>
+              <p className="text-text-secondary mb-6">Create and manage homepage sliders</p>
+              
+              <SliderManager />
+            </div>
           </div>
         )}
 

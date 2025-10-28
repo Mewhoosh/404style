@@ -269,7 +269,7 @@ export default function ThemeEditor() {
 
             <div className="flex gap-4">
               <button
-                onClick={() => setEditingTheme(null)}
+                onClick={handleSaveTheme}
                 disabled={saving}
                 className="flex-1 bg-secondary text-primary px-6 py-3 rounded-lg font-bold hover:bg-secondary-light transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
@@ -283,10 +283,7 @@ export default function ThemeEditor() {
                 )}
               </button>
               <button
-                onClick={() => {
-                  setEditingTheme(null);
-                  window.location.reload();
-                }}
+                onClick={() => setEditingTheme(null)}
                 disabled={saving}
                 className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-100 transition-all disabled:opacity-50"
               >

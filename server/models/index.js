@@ -20,6 +20,8 @@ const Product = require('./Product')(sequelize);
 const ProductImage = require('./ProductImage')(sequelize);
 const Theme = require('./Theme')(sequelize);
 const UserThemePreference = require('./UserThemePreference')(sequelize);
+const Slider = require('./Slider')(sequelize);
+const SliderItem = require('./SliderItem')(sequelize);
 
 // Define relationships
 Category.hasMany(Category, { as: 'children', foreignKey: 'parentId' });
@@ -31,16 +33,21 @@ Product.hasMany(ProductImage, { foreignKey: 'productId', as: 'images' });
 
 ProductImage.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 
-// Theme relationships
 User.hasOne(UserThemePreference, { foreignKey: 'userId', as: 'themePreference' });
 UserThemePreference.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 UserThemePreference.belongsTo(Theme, { foreignKey: 'themeId', as: 'theme' });
+
+Slider.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+Slider.hasMany(SliderItem, { foreignKey: 'sliderId', as: 'items' });
+
+SliderItem.belongsTo(Slider, { foreignKey: 'sliderId', as: 'slider' });
+SliderItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 
 // Sync database
 const syncDatabase = async () => {
   try {
     await sequelize.sync({ force: false, alter: false });
-    console.log('✅ Database synced');
+    console.log('Database synced');
   } catch (error) {
     console.error('Database sync error:', error);
   }
@@ -54,5 +61,7 @@ module.exports = {
   ProductImage,
   Theme,
   UserThemePreference,
+  Slider,
+  SliderItem,
   syncDatabase
 };

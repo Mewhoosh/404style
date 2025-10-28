@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import HomeSlider from '../components/HomeSlider';
 import { ChevronRight, Loader } from 'lucide-react';
 
 export default function Home() {
@@ -14,14 +15,12 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
-      // Fetch featured products (published, limited to 8)
       const productsRes = await fetch('http://localhost:5000/api/products?status=published');
       if (productsRes.ok) {
         const data = await productsRes.json();
         setFeaturedProducts(data.slice(0, 8));
       }
 
-      // Fetch categories
       const categoriesRes = await fetch('http://localhost:5000/api/categories');
       if (categoriesRes.ok) {
         const data = await categoriesRes.json();
@@ -61,6 +60,9 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* HOME SLIDER */}
+      <HomeSlider />
 
       {/* Categories Section */}
       <section className="py-16 bg-gray-50">

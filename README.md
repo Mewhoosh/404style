@@ -5,7 +5,11 @@ https://nodejs.org
 
 node --version
 npm --version
-
+npm install sharp
+npm install react-beautiful-dnd
+npm install lucide-react
+npm install react-beautiful-dnd
+npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities --legacy-peer-deps
 
 git clone https://github.com/mewhoosh/404style.git
 cd 404style

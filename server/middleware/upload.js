@@ -1,47 +1,93 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 
-// Ensure upload directories exist
-const uploadDir = path.join(__dirname, '../uploads/products');
-const thumbnailDir = path.join(__dirname, '../uploads/thumbnails');
+const uploadDir = 'uploads/';
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
-if (!fs.existsSync(thumbnailDir)) {
-  fs.mkdirSync(thumbnailDir, { recursive: true });
-}
 
-// Configure storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
+const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
   }
+  cb(new Error('Only image files are allowed'));
+};
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: fileFilter
 });
 
-// File filter (only images)
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG and WebP are allowed.'), false);
+const resizeImage = async (req, res, next) => {
+  if (!req.file) return next();
+
+  try {
+    const filename = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(req.file.originalname)}`;
+    const filepath = path.join(uploadDir, filename);
+
+    await sharp(req.file.buffer)
+      .resize(1200, 1200, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .jpeg({ quality: 90 })
+      .toFile(filepath);
+
+    req.file.filename = filename;
+    req.file.path = filepath;
+
+    next();
+  } catch (error) {
+    console.error('Image resize error:', error);
+    res.status(500).json({ message: 'Image processing failed' });
   }
 };
 
-// Configure multer
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-});
+const resizeMultiple = async (req, res, next) => {
+  if (!req.files || req.files.length === 0) return next();
 
-module.exports = upload;
+  try {
+    const processedFiles = [];
+
+    for (const file of req.files) {
+      const filename = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+      const filepath = path.join(uploadDir, filename);
+
+      await sharp(file.buffer)
+        .resize(1200, 1200, {
+          fit: 'inside',
+          withoutEnlargement: true
+        })
+        .jpeg({ quality: 90 })
+        .toFile(filepath);
+
+      processedFiles.push({
+        filename: filename,
+        path: filepath,
+        originalname: file.originalname
+      });
+    }
+
+    req.files = processedFiles;
+    next();
+  } catch (error) {
+    console.error('Image resize error:', error);
+    res.status(500).json({ message: 'Image processing failed' });
+  }
+};
+
+module.exports = { 
+  upload, 
+  resizeImage,
+  resizeMultiple
+};
