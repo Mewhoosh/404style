@@ -5,7 +5,8 @@ const { authMiddleware, isModeratorOrAdmin } = require('../middleware/auth');
 
 // Public routes
 router.get('/', productController.getAllProducts);
-router.get('/:id', productController.getProduct);
+router.get('/:id', productController.getProductWithDetails); // Zmienione
+router.get('/:id/related', productController.getRelatedProducts); // Nowe
 
 // Protected routes (moderator/admin)
 router.post('/', authMiddleware, isModeratorOrAdmin, productController.createProduct);

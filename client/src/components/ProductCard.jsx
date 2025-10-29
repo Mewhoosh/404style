@@ -2,19 +2,28 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, Eye } from 'lucide-react';
 
 export default function ProductCard({ product }) {
-  const primaryImage = product.images?.find(img => img.isPrimary) || product.images?.[0];
-  
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return 'https://via.placeholder.com/400x300';
-    // Jeśli URL zaczyna się od http/https, użyj go bezpośrednio
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       return imageUrl;
     }
-    // W przeciwnym razie dodaj localhost (dla lokalnych uploadów)
     return `http://localhost:5000${imageUrl}`;
   };
 
+  const getStockStatus = (stock) => {
+  if (stock === 0) {
+    return { text: 'Out of Stock', color: 'text-red-600', show: true };
+  } else if (stock < 10) {
+    return { text: 'Last Items!', color: 'text-orange-600', show: true };
+  } else if (stock < 30) {
+    return { text: 'Low Stock', color: 'text-yellow-600', show: true };
+  } else {
+    return { text: 'In Stock', color: 'text-green-600', show: false };
+  }
+};
+
   const imageUrl = getImageUrl(product.images?.[0]?.imageUrl);
+  const stockStatus = getStockStatus(product.stock);
 
   return (
     <div className="bg-white rounded-xl overflow-hidden border-2 border-gray-200 hover:border-secondary transition-all group">
@@ -48,9 +57,9 @@ export default function ProductCard({ product }) {
           <span className="text-2xl font-black text-secondary">
             ${parseFloat(product.price).toFixed(2)}
           </span>
-          {product.stock > 0 && product.stock < 10 && (
-            <span className="text-xs text-red-600 font-semibold">
-              Only {product.stock} left!
+          {stockStatus.show && (
+            <span className={`text-xs font-semibold ${stockStatus.color}`}>
+              {stockStatus.text}
             </span>
           )}
         </div>

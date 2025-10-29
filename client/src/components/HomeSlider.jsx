@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function HomeSlider() {
   const [slider, setSlider] = useState(null);
@@ -158,9 +159,12 @@ export default function HomeSlider() {
                       <p className="text-2xl font-black text-secondary mb-2">${parseFloat(price).toFixed(2)}</p>
                     )}
                     {item.product && (
-                      <button className="w-full bg-secondary text-primary py-3 rounded-lg font-bold hover:bg-secondary-light transition-all">
+                      <Link
+                        to={`/product/${item.product.id}`}
+                        className="w-full bg-secondary text-primary py-3 rounded-lg font-bold hover:bg-secondary-light transition-all flex items-center justify-center"
+                      >
                         View Product
-                      </button>
+                      </Link>
                     )}
                   </div>
                 </div>

@@ -13,6 +13,7 @@ import CategoryPage from './pages/CategoryPage';
 import ThemeLoader from './components/ThemeLoader';
 import SliderManager from './components/SliderManager';
 import SliderEditor from './pages/SliderEditor';
+import ProductDetailPage from './pages/ProductDetailPage';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               <Route path="/dashboard/products/edit/:id" element={<ProductForm />} />
               <Route path="/dashboard/sliders" element={<SliderManager />} />
               <Route path="/dashboard/sliders/:id" element={<ProtectedRoute><SliderEditor /></ProtectedRoute>} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
             </Routes>
           </main>
           <Footer />

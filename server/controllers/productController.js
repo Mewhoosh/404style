@@ -316,3 +316,76 @@ exports.setPrimaryImage = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+// Get product with breadcrumbs
+exports.getProductWithDetails = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id, {
+      include: [
+        { model: Category, as: 'category' },
+        { model: ProductImage, as: 'images' },
+        { model: User, as: 'creator', attributes: ['id', 'firstName', 'lastName', 'email'] }
+      ]
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Breadcrumbs
+    const breadcrumbs = [];
+    let currentCategory = product.category;
+    
+    while (currentCategory) {
+      breadcrumbs.unshift({
+        id: currentCategory.id,
+        name: currentCategory.name,
+        slug: currentCategory.slug
+      });
+      
+      if (currentCategory.parentId) {
+        currentCategory = await Category.findByPk(currentCategory.parentId);
+      } else {
+        currentCategory = null;
+      }
+    }
+
+    res.json({
+      ...product.toJSON(),
+      breadcrumbs
+    });
+  } catch (error) {
+    console.error('Get product with details error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Get related products (same category)
+exports.getRelatedProducts = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const relatedProducts = await Product.findAll({
+      where: {
+        categoryId: product.categoryId,
+        status: 'published',
+        id: { [Op.ne]: product.id }
+      },
+      include: [
+        { model: Category, as: 'category' },
+        { model: ProductImage, as: 'images' }
+      ],
+      limit: 4,
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json(relatedProducts);
+  } catch (error) {
+    console.error('Get related products error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
