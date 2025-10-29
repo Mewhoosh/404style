@@ -65,20 +65,20 @@ export default function HomeSlider() {
     return null;
   }
 
+  // FIX #3: Nie duplikuj jeśli mniej itemów niż itemsPerView
   const getVisibleItems = () => {
     const items = [];
-    for (let i = 0; i < itemsPerView; i++) {
-      const index = (currentIndex + i) % slider.items.length;
+    const totalItems = slider.items.length;
+    const visibleCount = Math.min(itemsPerView, totalItems); // Max tyle ile jest itemów
+    
+    for (let i = 0; i < visibleCount; i++) {
+      const index = (currentIndex + i) % totalItems;
       items.push(slider.items[index]);
     }
     return items;
   };
 
   const visibleItems = getVisibleItems();
-  const maxHeight = Math.max(...visibleItems.map(item => {
-    const description = item.customDescription || item.product?.description || '';
-    return description.length;
-  }));
 
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return 'https://via.placeholder.com/400x300';
@@ -88,31 +88,40 @@ export default function HomeSlider() {
     return `http://localhost:5000${imageUrl}`;
   };
 
+  // FIX #3: Responsive grid - dostosuj kolumny do faktycznej liczby itemów
+  const getGridClass = () => {
+    const itemCount = visibleItems.length;
+    if (itemCount === 1) return 'grid-cols-1';
+    if (itemCount === 2) return 'grid-cols-1 md:grid-cols-2';
+    return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+  };
+
   return (
     <div className="bg-gray-50 py-12">
       <div className="container mx-auto px-4">
         <div className="relative">
-          <button
-            onClick={handlePrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-3 rounded-full shadow-lg hover:bg-gray-100 transition-all"
-            aria-label="Previous"
-          >
-            <ChevronLeft size={24} className="text-primary" />
-          </button>
+          {/* Pokaż strzałki tylko jeśli jest więcej niż 1 item */}
+          {slider.items.length > 1 && (
+            <>
+              <button
+                onClick={handlePrev}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-3 rounded-full shadow-lg hover:bg-gray-100 transition-all"
+                aria-label="Previous"
+              >
+                <ChevronLeft size={24} className="text-primary" />
+              </button>
 
-          <button
-            onClick={handleNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-3 rounded-full shadow-lg hover:bg-gray-100 transition-all"
-            aria-label="Next"
-          >
-            <ChevronRight size={24} className="text-primary" />
-          </button>
+              <button
+                onClick={handleNext}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-3 rounded-full shadow-lg hover:bg-gray-100 transition-all"
+                aria-label="Next"
+              >
+                <ChevronRight size={24} className="text-primary" />
+              </button>
+            </>
+          )}
 
-          <div className={`grid gap-6 ${
-            itemsPerView === 1 ? 'grid-cols-1' : 
-            itemsPerView === 2 ? 'grid-cols-2' : 
-            'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-          }`}>
+          <div className={`grid gap-6 ${getGridClass()}`}>
             {visibleItems.map((item, idx) => {
               const imageUrl = getImageUrl(
                 item.customImageUrl || item.product?.images?.[0]?.imageUrl
@@ -125,24 +134,31 @@ export default function HomeSlider() {
               return (
                 <div
                   key={`${item.id}-${idx}`}
-                  className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-gray-200"
-                  style={{ minHeight: `${maxHeight * 0.5 + 300}px` }}
+                  className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-gray-200 flex flex-col"
                 >
-                  <div className="h-64 overflow-hidden">
+                  {/* FIX #2: Stała wysokość obrazka */}
+                  <div className="h-64 overflow-hidden flex-shrink-0">
                     <img
                       src={imageUrl}
                       alt={title}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                     />
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-primary mb-2">{title}</h3>
-                    <p className="text-text-secondary mb-4 line-clamp-3">{description}</p>
+                  
+                  {/* FIX #2: Flex-grow pozwala content rosnąć, max-height + overflow kontroluje wysokość */}
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-xl font-bold text-primary mb-2 line-clamp-2">{title}</h3>
+                    
+                    {/* FIX #1: Usunięto line-clamp-3, dodano max-height + overflow-y-auto dla scrollowania */}
+                    <div className="text-text-secondary mb-4 flex-grow overflow-y-auto max-h-32">
+                      <p className="whitespace-pre-wrap">{description}</p>
+                    </div>
+                    
                     {price && (
-                      <p className="text-2xl font-black text-secondary">${parseFloat(price).toFixed(2)}</p>
+                      <p className="text-2xl font-black text-secondary mb-2">${parseFloat(price).toFixed(2)}</p>
                     )}
                     {item.product && (
-                      <button className="mt-4 w-full bg-secondary text-primary py-3 rounded-lg font-bold hover:bg-secondary-light transition-all">
+                      <button className="w-full bg-secondary text-primary py-3 rounded-lg font-bold hover:bg-secondary-light transition-all">
                         View Product
                       </button>
                     )}
@@ -152,20 +168,23 @@ export default function HomeSlider() {
             })}
           </div>
 
-          <div className="flex justify-center gap-2 mt-6">
-            {slider.items.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  setCurrentIndex(idx);
-                  setIsAutoPlaying(false);
-                }}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  idx === currentIndex ? 'bg-secondary w-8' : 'bg-gray-300'
-                }`}
-              />
-            ))}
-          </div>
+          {/* Pokaż dots tylko jeśli jest więcej niż 1 item */}
+          {slider.items.length > 1 && (
+            <div className="flex justify-center gap-2 mt-6">
+              {slider.items.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setCurrentIndex(idx);
+                    setIsAutoPlaying(false);
+                  }}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    idx === currentIndex ? 'bg-secondary w-8' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
