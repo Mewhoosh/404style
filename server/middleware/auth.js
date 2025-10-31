@@ -5,14 +5,13 @@ const { User } = require('../models');
 const authMiddleware = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-
+    
     if (!token) {
       return res.status(401).json({ message: 'No token, authorization denied' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Get user with full info
     const user = await User.findByPk(decoded.id, {
       attributes: { exclude: ['password'] }
     });
@@ -23,6 +22,8 @@ const authMiddleware = async (req, res, next) => {
 
     req.userId = decoded.id;
     req.user = user;
+    req.userRole = user.role;
+    
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token is not valid' });
@@ -48,12 +49,10 @@ const isModeratorOrAdmin = (req, res, next) => {
 // Check if moderator has access to specific category
 const checkCategoryAccess = (categoryId) => {
   return (req, res, next) => {
-    // Admin has access to everything
     if (req.user.role === 'admin') {
       return next();
     }
-
-    // Moderator - check assigned categories
+    
     if (req.user.role === 'moderator') {
       const assignedCategories = req.user.assignedCategories || [];
       
@@ -65,7 +64,7 @@ const checkCategoryAccess = (categoryId) => {
       
       return next();
     }
-
+    
     return res.status(403).json({ message: 'Access denied.' });
   };
 };

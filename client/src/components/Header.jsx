@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, User, Search, Menu, X, LogOut, Settings, LayoutDashboard } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const { user, logout, isAuthenticated } = useAuth();
+  const { setIsCartOpen, getCartCount } = useCart();
 
   useEffect(() => {
     fetchCategories();
@@ -134,16 +136,18 @@ export default function Header() {
               </Link>
             )}
 
-            {/* Cart */}
-            <Link 
-              to="/cart" 
+            {/* Cart Button */}
+            <button
+              onClick={() => setIsCartOpen(true)}
               className="relative hover:text-secondary transition-colors hover:scale-110 transform group"
             >
               <ShoppingCart size={26} strokeWidth={1.5} />
-              <span className="absolute -top-2 -right-2 bg-secondary text-primary text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold group-hover:scale-125 transition-transform">
-                0
-              </span>
-            </Link>
+              {getCartCount() > 0 && (
+                <span className="absolute -top-2 -right-2 bg-secondary text-primary text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold group-hover:scale-125 transition-transform">
+                  {getCartCount()}
+                </span>
+              )}
+            </button>
             
             {/* Mobile menu button */}
             <button 

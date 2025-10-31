@@ -1,12 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
-import { User, Lock, Palette, Bell } from 'lucide-react';
+import { Navigate, Link } from 'react-router-dom';
+import { User, ShoppingBag, Palette, Package, Truck, CheckCircle, Clock } from 'lucide-react';
 import ThemeSelector from '../components/ThemeSelector';
 
 export default function ProfileSettings() {
   const { user, loading, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      fetchOrders();
+    }
+  }, [activeTab]);
+
+  const fetchOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/orders', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const getStatusInfo = (status) => {
+    const statusMap = {
+      pending: { text: 'Pending', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
+      processing: { text: 'Processing', color: 'bg-blue-100 text-blue-700', icon: Package },
+      shipped: { text: 'Shipped', color: 'bg-purple-100 text-purple-700', icon: Truck },
+      delivered: { text: 'Delivered', color: 'bg-green-100 text-green-700', icon: CheckCircle },
+    };
+    return statusMap[status] || statusMap.pending;
+  };
 
   if (loading) {
     return (
@@ -22,14 +61,12 @@ export default function ProfileSettings() {
 
   const tabs = [
     { id: 'profile', label: 'Profile Info', icon: User },
-    { id: 'security', label: 'Security', icon: Lock },
+    { id: 'orders', label: 'My Orders', icon: ShoppingBag },
     { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
-      {/* Header */}
       <div className="container mx-auto px-4 mb-8">
         <h1 className="text-4xl font-black text-primary mb-2">Profile Settings</h1>
         <p className="text-text-secondary">Manage your account settings and preferences</p>
@@ -37,7 +74,6 @@ export default function ProfileSettings() {
 
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
               {tabs.map(tab => {
@@ -59,7 +95,6 @@ export default function ProfileSettings() {
               })}
             </div>
 
-            {/* User Info Card */}
             <div className="bg-white rounded-xl p-6 border-2 border-gray-200 mt-6">
               <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center text-3xl font-black text-primary mx-auto mb-4">
                 {user?.firstName?.[0]}{user?.lastName?.[0]}
@@ -76,7 +111,6 @@ export default function ProfileSettings() {
             </div>
           </div>
 
-          {/* Content */}
           <div className="lg:col-span-3">
             {activeTab === 'profile' && (
               <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
@@ -127,46 +161,70 @@ export default function ProfileSettings() {
               </div>
             )}
 
-            {activeTab === 'security' && (
+            {activeTab === 'orders' && (
               <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
-                <h2 className="text-2xl font-bold text-primary mb-6">Security Settings</h2>
-                <p className="text-text-secondary mb-6">Change your password</p>
+                <h2 className="text-2xl font-bold text-primary mb-6">My Orders</h2>
+                <p className="text-text-secondary mb-6">Track and manage your orders</p>
                 
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      Current Password
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-secondary focus:outline-none"
-                    />
+                {loadingOrders ? (
+                  <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-secondary"></div>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-secondary focus:outline-none"
-                    />
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingBag className="mx-auto text-gray-300 mb-4" size={64} />
+                    <p className="text-text-secondary mb-4">You haven't placed any orders yet</p>
+                    <Link
+                      to="/"
+                      className="inline-block bg-secondary text-primary px-6 py-3 rounded-lg font-bold hover:bg-secondary-light transition-all"
+                    >
+                      Start Shopping
+                    </Link>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      Confirm New Password
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-secondary focus:outline-none"
-                    />
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map(order => {
+                      const statusInfo = getStatusInfo(order.status);
+                      const StatusIcon = statusInfo.icon;
+                      
+                      return (
+                        <Link
+                          key={order.id}
+                          to={`/orders/${order.id}`}
+                          className="block p-6 border-2 border-gray-200 rounded-xl hover:border-secondary transition-all"
+                        >
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <span className="text-xs font-bold text-gray-500">ORDER ID: {order.id}</span>
+                                <span className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 ${statusInfo.color}`}>
+                                  <StatusIcon size={14} />
+                                  {statusInfo.text}
+                                </span>
+                              </div>
+                              <p className="text-sm text-text-secondary mb-2">
+                                {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </p>
+                              <p className="text-sm text-text-secondary">
+                                {order.items?.length || 0} items
+                              </p>
+                            </div>
+                            <div className="text-left md:text-right">
+                              <p className="text-sm text-text-secondary mb-1">Total</p>
+                              <p className="text-2xl font-black text-secondary">
+                                ${parseFloat(order.totalPrice).toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
-
-                  <button className="bg-secondary text-primary px-8 py-3 rounded-lg font-bold hover:bg-secondary-light transition-all">
-                    Change Password
-                  </button>
-                </div>
+                )}
               </div>
             )}
 
@@ -176,39 +234,6 @@ export default function ProfileSettings() {
                 <p className="text-text-secondary mb-6">Choose your preferred color theme</p>
                 
                 <ThemeSelector />
-              </div>
-            )}
-
-            {activeTab === 'notifications' && (
-              <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
-                <h2 className="text-2xl font-bold text-primary mb-6">Notification Preferences</h2>
-                <p className="text-text-secondary mb-6">Manage how you receive notifications</p>
-                
-                <div className="space-y-4">
-                  <label className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-all">
-                    <div>
-                      <p className="font-semibold text-primary">Email Notifications</p>
-                      <p className="text-sm text-text-secondary">Receive updates via email</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" defaultChecked />
-                  </label>
-
-                  <label className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-all">
-                    <div>
-                      <p className="font-semibold text-primary">Order Updates</p>
-                      <p className="text-sm text-text-secondary">Get notified about order status</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" defaultChecked />
-                  </label>
-
-                  <label className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-all">
-                    <div>
-                      <p className="font-semibold text-primary">Promotional Emails</p>
-                      <p className="text-sm text-text-secondary">Receive special offers and promotions</p>
-                    </div>
-                    <input type="checkbox" className="w-5 h-5" />
-                  </label>
-                </div>
               </div>
             )}
           </div>
