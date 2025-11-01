@@ -1,22 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, MapPin, Mail, Phone } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, MapPin, Mail, Phone, Loader } from 'lucide-react';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
   const location = useLocation();
-  const { clearCart } = useCart();
+  const [searchParams] = useSearchParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   useEffect(() => {
-    if (location.state?.shouldClearCart) {
-      clearCart();
-    }
-    
     fetchOrder();
-  }, [id]);
+    
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      updatePaymentStatus();
+    }
+  }, [id, searchParams]);
 
   const fetchOrder = async () => {
     try {
@@ -35,6 +36,52 @@ export default function OrderDetailPage() {
       console.error('Failed to fetch order:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updatePaymentStatus = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`http://localhost:5000/api/orders/${id}/payment-success`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      setTimeout(() => {
+        fetchOrder();
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to update payment status:', error);
+    }
+  };
+
+  const handlePayment = async () => {
+    setPaymentLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/payments/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ orderId: id })
+      });
+
+      if (response.ok) {
+        const { url } = await response.json();
+        window.location.href = url;
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Payment failed');
+        setPaymentLoading(false);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Payment failed. Please try again.');
+      setPaymentLoading(false);
     }
   };
 
@@ -82,14 +129,30 @@ export default function OrderDetailPage() {
   const statusInfo = getStatusInfo(order.status);
   const paymentInfo = getPaymentStatusInfo(order.paymentStatus);
   const StatusIcon = statusInfo.icon;
+  
+  const paymentStatus = searchParams.get('payment');
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-12">
       <div className="container mx-auto px-4 max-w-5xl">
         {location.state?.message && (
-          <div className="bg-green-50 border-2 border-green-500 rounded-xl p-4 mb-6 flex items-center gap-3 animate-slide-left">
+          <div className="bg-green-50 border-2 border-green-500 rounded-xl p-4 mb-6 flex items-center gap-3">
             <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
             <p className="text-green-800 font-semibold">{location.state.message}</p>
+          </div>
+        )}
+
+        {paymentStatus === 'success' && (
+          <div className="bg-green-50 border-2 border-green-500 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <CheckCircle className="text-green-600 flex-shrink-0" size={24} />
+            <p className="text-green-800 font-semibold">Payment successful! Your order is being processed.</p>
+          </div>
+        )}
+
+        {paymentStatus === 'cancelled' && (
+          <div className="bg-red-50 border-2 border-red-500 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <XCircle className="text-red-600 flex-shrink-0" size={24} />
+            <p className="text-red-800 font-semibold">Payment cancelled. You can try again below.</p>
           </div>
         )}
 
@@ -103,12 +166,14 @@ export default function OrderDetailPage() {
           </Link>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-black text-primary mb-2">
-                Order Details
-              </h1>
-               <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-bold">
-                ID: {order.id}
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl md:text-4xl font-black text-primary">
+                  Order Details
+                </h1>
+                <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-bold">
+                  ID: {order.id}
                 </span>
+              </div>
               <p className="text-text-secondary">
                 Order placed on {new Date(order.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -133,7 +198,6 @@ export default function OrderDetailPage() {
 
         <div className="grid md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
-            {/* Order Items */}
             <div className="bg-white rounded-xl p-4 md:p-6 border-2 border-gray-200">
               <h2 className="text-xl font-bold text-primary mb-4">Order Items</h2>
               <div className="space-y-4">
@@ -161,7 +225,6 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
-            {/* Shipping Address */}
             <div className="bg-white rounded-xl p-4 md:p-6 border-2 border-gray-200">
               <h2 className="text-xl font-bold text-primary mb-4 flex items-center gap-2">
                 <MapPin size={24} className="text-secondary" />
@@ -187,7 +250,6 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
-            {/* Notes */}
             {order.notes && (
               <div className="bg-white rounded-xl p-4 md:p-6 border-2 border-gray-200">
                 <h2 className="text-xl font-bold text-primary mb-4">Order Notes</h2>
@@ -196,7 +258,6 @@ export default function OrderDetailPage() {
             )}
           </div>
 
-          {/* Order Summary */}
           <div className="md:col-span-1">
             <div className="bg-white rounded-xl p-4 md:p-6 border-2 border-gray-200 sticky top-24">
               <h2 className="text-xl font-bold text-primary mb-4">Order Summary</h2>
@@ -219,7 +280,23 @@ export default function OrderDetailPage() {
                 </span>
               </div>
 
-              {/* Status Messages */}
+              {order.paymentStatus === 'pending' && (
+                <button
+                  onClick={handlePayment}
+                  disabled={paymentLoading}
+                  className="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
+                >
+                  {paymentLoading ? (
+                    <>
+                      <Loader className="animate-spin" size={20} />
+                      Redirecting to payment...
+                    </>
+                  ) : (
+                    'Pay Now'
+                  )}
+                </button>
+              )}
+
               {order.status === 'pending' && (
                 <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
                   <p className="text-sm text-yellow-800 font-semibold leading-relaxed">

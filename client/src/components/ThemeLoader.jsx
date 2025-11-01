@@ -24,7 +24,7 @@ export default function ThemeLoader() {
 
       if (response.ok) {
         const theme = await response.json();
-        console.log('🎨 Theme loaded:', theme);
+        // console.log('Theme loaded:', theme);
         
         // Apply theme colors to CSS variables
         document.documentElement.style.setProperty('--color-primary', theme.colorPrimary);

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Loader, CreditCard, Lock } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Loader, CreditCard } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 export default function CheckoutPage() {
-  const { cart, getCartTotal } = useCart();
+  const { cart, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,9 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    if (cart.length === 0) {
+    const lastOrderId = sessionStorage.getItem('lastOrderId');
+    
+    if (cart.length === 0 && !lastOrderId) {
       navigate('/cart');
     }
 
@@ -34,6 +36,10 @@ export default function CheckoutPage() {
         email: user.email || ''
       }));
     }
+
+    return () => {
+      sessionStorage.removeItem('lastOrderId');
+    };
   }, [cart, user, navigate]);
 
   const handleChange = (e) => {
@@ -85,18 +91,22 @@ export default function CheckoutPage() {
 
       if (response.ok) {
         const data = await response.json();
-        
         const orderId = data.order?.id || data.id;
         
         if (orderId) {
-          navigate(`/orders/${orderId}`, {
-            state: { 
-              message: 'Order placed successfully!',
-              shouldClearCart: true 
-            }
-          });
+          sessionStorage.setItem('lastOrderId', orderId);
+          clearCart();
+          
+          setTimeout(() => {
+            navigate(`/orders/${orderId}`, {
+              state: { 
+                message: 'Order placed successfully!'
+              }
+            });
+          }, 100);
         } else {
           alert('Order placed successfully!');
+          clearCart();
           navigate('/');
         }
       } else {
@@ -118,10 +128,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-gray-50 py-6 md:py-12">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="mb-6 md:mb-8">
-          <Link
-            to="/cart"
-            className="inline-flex items-center gap-2 text-secondary hover:text-secondary-dark mb-4"
-          >
+          <Link to="/cart" className="inline-flex items-center gap-2 text-secondary hover:text-secondary-dark mb-4">
             <ArrowLeft size={20} />
             Back to Cart
           </Link>
@@ -137,9 +144,7 @@ export default function CheckoutPage() {
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      First Name *
-                    </label>
+                    <label className="block text-sm font-semibold text-primary mb-2">First Name *</label>
                     <input
                       type="text"
                       name="firstName"
@@ -151,9 +156,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      Last Name *
-                    </label>
+                    <label className="block text-sm font-semibold text-primary mb-2">Last Name *</label>
                     <input
                       type="text"
                       name="lastName"
@@ -165,9 +168,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      Email *
-                    </label>
+                    <label className="block text-sm font-semibold text-primary mb-2">Email *</label>
                     <input
                       type="email"
                       name="email"
@@ -179,9 +180,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      Phone *
-                    </label>
+                    <label className="block text-sm font-semibold text-primary mb-2">Phone *</label>
                     <input
                       type="tel"
                       name="phone"
@@ -199,9 +198,7 @@ export default function CheckoutPage() {
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      Address *
-                    </label>
+                    <label className="block text-sm font-semibold text-primary mb-2">Address *</label>
                     <input
                       type="text"
                       name="address"
@@ -215,9 +212,7 @@ export default function CheckoutPage() {
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-primary mb-2">
-                        City *
-                      </label>
+                      <label className="block text-sm font-semibold text-primary mb-2">City *</label>
                       <input
                         type="text"
                         name="city"
@@ -229,9 +224,7 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-primary mb-2">
-                        Postal Code *
-                      </label>
+                      <label className="block text-sm font-semibold text-primary mb-2">Postal Code *</label>
                       <input
                         type="text"
                         name="postalCode"
@@ -244,9 +237,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      Country *
-                    </label>
+                    <label className="block text-sm font-semibold text-primary mb-2">Country *</label>
                     <select
                       name="country"
                       value={formData.country}
@@ -264,9 +255,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-primary mb-2">
-                      Order Notes (Optional)
-                    </label>
+                    <label className="block text-sm font-semibold text-primary mb-2">Order Notes (Optional)</label>
                     <textarea
                       name="notes"
                       value={formData.notes}
@@ -284,10 +273,10 @@ export default function CheckoutPage() {
                   <CreditCard size={24} />
                   Payment Method
                 </h2>
-                <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
-                  <p className="text-sm text-yellow-800 flex items-center gap-2">
-                    <Lock size={16} />
-                    Payment will be processed after order confirmation
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800 font-semibold mb-2">Payment after order confirmation</p>
+                  <p className="text-sm text-blue-700">
+                    After placing your order, you will be redirected to the payment page where you can complete your payment securely.
                   </p>
                 </div>
               </div>
@@ -306,13 +295,9 @@ export default function CheckoutPage() {
                         className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-primary line-clamp-2 mb-1">
-                          {item.name}
-                        </p>
+                        <p className="text-sm font-bold text-primary line-clamp-2 mb-1">{item.name}</p>
                         <div className="flex items-center justify-between">
-                          <p className="text-xs text-text-secondary">
-                            Qty: {item.quantity}
-                          </p>
+                          <p className="text-xs text-text-secondary">Qty: {item.quantity}</p>
                           <p className="text-sm font-bold text-secondary">
                             ${(parseFloat(item.price) * item.quantity).toFixed(2)}
                           </p>
@@ -335,9 +320,7 @@ export default function CheckoutPage() {
 
                 <div className="flex justify-between mb-6">
                   <span className="text-2xl font-bold text-primary">Total</span>
-                  <span className="text-2xl font-black text-secondary">
-                    ${total.toFixed(2)}
-                  </span>
+                  <span className="text-2xl font-black text-secondary">${total.toFixed(2)}</span>
                 </div>
 
                 <button
