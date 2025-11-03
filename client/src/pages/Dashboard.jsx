@@ -6,6 +6,7 @@ import ThemeEditor from '../components/ThemeEditor';
 import CategoryManager from '../components/CategoryManager';
 import ProductManager from '../components/ProductManager';
 import SliderManager from '../components/SliderManager';
+import OrderManager from '../components/OrderManager';
 
 export default function Dashboard() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -176,9 +177,12 @@ export default function Dashboard() {
                   <Image size={24} />
                   Manage Sliders
                 </button>
-                <button className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:text-primary transition-all font-semibold">
-                  <MessageSquare size={24} />
-                  Review Comments
+                <button 
+                  onClick={() => setActiveTab('orders')}
+                  className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:text-primary transition-all font-semibold"
+                >
+                  <ShoppingCart size={24} />
+                  View Orders
                 </button>
               </div>
             </div>
@@ -244,9 +248,13 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'orders' && (
-          <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
-            <h2 className="text-2xl font-bold text-primary mb-4">Order Management</h2>
-            <p className="text-text-secondary">Order tracking coming soon...</p>
+          <div>
+            <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
+              <h2 className="text-2xl font-bold text-primary mb-2">Order Management</h2>
+              <p className="text-text-secondary mb-6">Track and manage all orders</p>
+              
+              <OrderManager />
+            </div>
           </div>
         )}
       </div>

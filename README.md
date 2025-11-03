@@ -11,6 +11,9 @@ npm install lucide-react
 npm install react-beautiful-dnd
 npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities --legacy-peer-deps
 npm install ogl --legacy-peer-deps
+npm install stripe
+npm install @stripe/stripe-js --legacy-peer-deps w cleint
+npm install nodemailer
 
 git clone https://github.com/mewhoosh/404style.git
 cd 404style

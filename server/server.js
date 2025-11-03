@@ -55,6 +55,9 @@ app.use('/api/sliders', require('./routes/sliders'));
 const orderRoutes = require('./routes/orders');
 app.use('/api/orders', orderRoutes);
 
+const paymentRoutes = require('./routes/payments');
+app.use('/api/payments', paymentRoutes);
+
 // Sync database and start server
 const PORT = process.env.PORT || 5000;
 syncDatabase().then(() => {

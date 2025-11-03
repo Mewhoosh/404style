@@ -1,5 +1,6 @@
 const { Order, OrderItem, Product, User } = require('../models');
 const { Op } = require('sequelize');
+const emailService = require('../services/emailService');
 
 // Create order (user only)
 exports.createOrder = async (req, res) => {
@@ -41,7 +42,6 @@ exports.createOrder = async (req, res) => {
       }
 
       totalPrice += parseFloat(product.price) * item.quantity;
-
       orderItems.push({
         productId: product.id,
         quantity: item.quantity,
@@ -91,6 +91,9 @@ exports.createOrder = async (req, res) => {
         }
       ]
     });
+
+    // Send order confirmation email
+    await emailService.sendOrderConfirmation(createdOrder);
 
     res.status(201).json({
       message: 'Order created successfully',
@@ -195,7 +198,15 @@ exports.getAllOrders = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status, paymentStatus } = req.body;
-    const order = await Order.findByPk(req.params.id);
+    const order = await Order.findByPk(req.params.id, {
+      include: [
+        {
+          model: OrderItem,
+          as: 'items',
+          include: [{ model: Product, as: 'product' }]
+        }
+      ]
+    });
 
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
@@ -216,6 +227,13 @@ exports.updateOrderStatus = async (req, res) => {
         }
       ]
     });
+
+    // Send email based on status change
+    if (status === 'shipped') {
+      await emailService.sendShippingNotification(updatedOrder);
+    } else if (status === 'delivered') {
+      await emailService.sendDeliveryConfirmation(updatedOrder);
+    }
 
     res.json({
       message: 'Order status updated',
@@ -260,5 +278,41 @@ exports.cancelOrder = async (req, res) => {
   } catch (error) {
     console.error('Cancel order error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Update payment success
+exports.updatePaymentSuccess = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id, {
+      include: [
+        {
+          model: OrderItem,
+          as: 'items',
+          include: [{ model: Product, as: 'product' }]
+        }
+      ]
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (order.userId !== req.userId) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    await order.update({
+      paymentStatus: 'paid',
+      status: 'processing'
+    });
+
+    // Send payment confirmation email
+    await emailService.sendPaymentConfirmation(order);
+
+    res.json({ message: 'Payment status updated' });
+  } catch (error) {
+    console.error('Update payment status error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

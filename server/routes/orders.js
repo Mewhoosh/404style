@@ -13,5 +13,6 @@ router.delete('/:id/cancel', authMiddleware, orderController.cancelOrder);
 // Admin/Moderator routes
 router.get('/admin/all', authMiddleware, roleAuth(['admin', 'moderator']), orderController.getAllOrders);
 router.patch('/:id/status', authMiddleware, roleAuth(['admin', 'moderator']), orderController.updateOrderStatus);
+router.post('/:id/payment-success', authMiddleware, orderController.updatePaymentSuccess);
 
 module.exports = router;
