@@ -239,7 +239,7 @@ export default function Header() {
                 className="hover:text-secondary transition-colors hover:scale-110 transform flex items-center gap-2"
               >
                 <User size={26} strokeWidth={1.5} />
-                <span className="hidden md:block font-medium">Login</span>
+                {/* <span className="hidden md:block font-medium">Login</span> */}
               </Link>
             )}
 
