@@ -86,7 +86,7 @@ export default function SliderEditor() {
 
   const fetchSlider = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/sliders/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -122,7 +122,7 @@ export default function SliderEditor() {
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/sliders/${id}/items/product`, {
         method: 'POST',
         headers: {
@@ -157,7 +157,7 @@ export default function SliderEditor() {
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const formData = new FormData();
       formData.append('customTitle', customCard.title);
       formData.append('customDescription', customCard.description);
@@ -189,7 +189,7 @@ export default function SliderEditor() {
     if (!confirm('Remove this item from slider?')) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/sliders/${id}/items/${itemId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -223,7 +223,7 @@ export default function SliderEditor() {
       }));
 
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         await fetch(`http://localhost:5000/api/sliders/${id}/items/reorder`, {
           method: 'PUT',
           headers: {

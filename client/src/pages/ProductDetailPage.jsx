@@ -23,6 +23,16 @@ export default function ProductDetailPage() {
     window.scrollTo(0, 0);
   }, [id]);
 
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return 'https://via.placeholder.com/600x600';
+    // If it's already an external URL, return as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    // Otherwise, it's a local upload
+    return `http://localhost:5000${imageUrl}`;
+  };
+
   const fetchProduct = async () => {
     try {
       const response = await fetch(`http://localhost:5000/api/products/${id}`);
@@ -128,7 +138,7 @@ export default function ProductDetailPage() {
             <div>
               <div className="bg-white rounded-xl overflow-hidden border-2 border-gray-200 mb-3">
                 <img
-                  src={selectedImage ? `http://localhost:5000${selectedImage}` : 'https://via.placeholder.com/600x600'}
+                  src={getImageUrl(selectedImage)}
                   alt={product.name}
                   className="w-full h-[500px] object-cover"
                 />
@@ -146,7 +156,7 @@ export default function ProductDetailPage() {
                       }`}
                     >
                       <img
-                        src={`http://localhost:5000${img.imageUrl}`}
+                        src={getImageUrl(img.imageUrl)}
                         alt={`${product.name} ${img.id}`}
                         className="w-full h-20 object-cover"
                       />

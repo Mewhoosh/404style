@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
   // Load user from API on mount
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
 
       if (!token) {
         // No token - load default theme
@@ -108,20 +108,20 @@ export const AuthProvider = ({ children }) => {
         if (response.ok) {
           const data = await response.json();
           setUser(data.user);
-          localStorage.setItem('user', JSON.stringify(data.user));
+          sessionStorage.setItem('user', JSON.stringify(data.user));
           
           // Load user's theme
           await loadUserTheme(token);
         } else {
           // Token invalid, clear everything and load default theme
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
           await loadDefaultTheme();
         }
       } catch (error) {
         console.error('Load user error:', error);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
         await loadDefaultTheme();
       } finally {
         setLoading(false);
@@ -132,8 +132,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (userData, token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('token', token);
+    sessionStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     
     // Load user's theme after login
@@ -141,9 +141,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('savedEmail');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    localStorage.removeItem('savedEmail'); // Email można zostawić w localStorage
     setUser(null);
     
     // Reset to default theme after logout

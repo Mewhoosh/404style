@@ -59,7 +59,7 @@ export default function ProductForm() {
   const fetchProduct = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/products/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -111,7 +111,7 @@ export default function ProductForm() {
 
   const removeExistingImage = async (imageId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/products/${id}/images/${imageId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -155,7 +155,7 @@ export default function ProductForm() {
         formDataToSend.append('images', img.file);
       });
 
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const url = id 
         ? `http://localhost:5000/api/products/${id}`
         : 'http://localhost:5000/api/products';

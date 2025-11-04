@@ -21,7 +21,7 @@ export default function OrderDetailPage() {
 
   const fetchOrder = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/orders/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -41,7 +41,7 @@ export default function OrderDetailPage() {
 
   const updatePaymentStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       await fetch(`http://localhost:5000/api/orders/${id}/payment-success`, {
         method: 'POST',
         headers: {
@@ -60,7 +60,7 @@ export default function OrderDetailPage() {
   const handlePayment = async () => {
     setPaymentLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/payments/create-checkout-session', {
         method: 'POST',
         headers: {

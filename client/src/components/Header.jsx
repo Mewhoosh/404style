@@ -8,12 +8,31 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
   const { setIsCartOpen, getCartCount } = useCart();
 
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  // Debounce search
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      handleSearch();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const fetchCategories = async () => {
     try {
@@ -25,6 +44,30 @@ export default function Header() {
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     }
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
+    setSearchLoading(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/products?search=${encodeURIComponent(searchQuery)}&status=published`);
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data);
+        setShowSearchResults(true);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const closeSearch = () => {
+    setShowSearchResults(false);
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
   return (
@@ -51,12 +94,76 @@ export default function Header() {
               <input
                 type="text"
                 placeholder="What are you looking for?"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery && setShowSearchResults(true)}
                 className="w-full px-6 py-3 rounded-full bg-primary-light text-accent placeholder-text-light border-2 border-transparent focus:border-secondary focus:outline-none transition-all"
               />
               <Search 
                 className="absolute right-5 top-3.5 text-secondary group-hover:scale-110 transition-transform" 
                 size={22} 
               />
+
+              {/* Search Results Dropdown */}
+              {showSearchResults && (
+                <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border-2 border-gray-100 max-h-96 overflow-y-auto z-50">
+                  {searchLoading ? (
+                    <div className="p-4 text-center text-gray-500">
+                      Searching...
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="p-2">
+                      {searchResults.slice(0, 5).map((product) => (
+                        <Link
+                          key={product.id}
+                          to={`/product/${product.id}`}
+                          onClick={closeSearch}
+                          className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition-all group"
+                        >
+                          {product.images && product.images[0] ? (
+                            <img
+                              src={`http://localhost:5000${product.images[0].imageUrl}`}
+                              alt={product.name}
+                              className="w-16 h-16 object-cover rounded-lg"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                          )}
+                          <div className="flex-1">
+                            <h4 className="font-bold text-primary group-hover:text-secondary transition-colors">
+                              {product.name}
+                            </h4>
+                            <p className="text-sm text-gray-500 line-clamp-1">
+                              {product.description}
+                            </p>
+                            <p className="text-secondary font-bold mt-1">
+                              ${product.price}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                      {searchResults.length > 5 && (
+                        <div className="p-3 text-center text-sm text-gray-500">
+                          And {searchResults.length - 5} more results...
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                      <p className="font-medium mb-2">No products found</p>
+                      <p className="text-sm">Try different keywords</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Overlay to close search */}
+              {showSearchResults && (
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={closeSearch}
+                ></div>
+              )}
             </div>
           </div>
 
