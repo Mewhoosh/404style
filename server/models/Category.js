@@ -29,5 +29,12 @@ module.exports = (sequelize) => {
     timestamps: true
   });
 
+  Category.associate = (models) => {
+    Category.hasMany(models.Product, { as: 'products', foreignKey: 'categoryId' });
+    Category.belongsTo(models.Category, { as: 'parent', foreignKey: 'parentId' });
+    Category.hasMany(models.Category, { as: 'children', foreignKey: 'parentId' });
+    Category.hasMany(models.ModeratorCategory, { as: 'moderators', foreignKey: 'categoryId' });
+  };
+
   return Category;
 };

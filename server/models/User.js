@@ -61,5 +61,15 @@ module.exports = (sequelize) => {
     return await bcrypt.compare(password, this.password);
   };
 
+  User.associate = (models) => {
+    User.hasMany(models.Product, { as: 'products', foreignKey: 'createdBy' });
+    User.hasMany(models.Order, { as: 'orders', foreignKey: 'userId' });
+    User.hasMany(models.Comment, { as: 'comments', foreignKey: 'userId' });
+    User.hasMany(models.CommentVote, { as: 'votes', foreignKey: 'userId' });
+    User.hasMany(models.Notification, { as: 'notifications', foreignKey: 'userId' });
+    User.hasMany(models.ModeratorCategory, { as: 'moderatorCategories', foreignKey: 'userId' });
+    User.hasOne(models.UserThemePreference, { as: 'themePreference', foreignKey: 'userId' });
+  };
+
   return User;
 };

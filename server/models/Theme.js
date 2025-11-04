@@ -39,5 +39,10 @@ module.exports = (sequelize) => {
     timestamps: true
   });
 
+  Theme.associate = (models) => {
+    Theme.belongsTo(models.User, { as: 'creator', foreignKey: 'createdBy' });
+    Theme.hasMany(models.UserThemePreference, { as: 'preferences', foreignKey: 'themeId' });
+  };
+
   return Theme;
 };

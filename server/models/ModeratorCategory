@@ -1,0 +1,32 @@
+module.exports = (sequelize, DataTypes) => {
+  const ModeratorCategory = sequelize.define('ModeratorCategory', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Users',
+        key: 'id'
+      }
+    },
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Categories',
+        key: 'id'
+      }
+    }
+  });
+
+  ModeratorCategory.associate = (models) => {
+    ModeratorCategory.belongsTo(models.User, { as: 'moderator', foreignKey: 'userId' });
+    ModeratorCategory.belongsTo(models.Category, { as: 'category', foreignKey: 'categoryId' });
+  };
+
+  return ModeratorCategory;
+};

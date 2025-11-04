@@ -21,5 +21,10 @@ module.exports = (sequelize) => {
     timestamps: true
   });
 
+  UserThemePreference.associate = (models) => {
+    UserThemePreference.belongsTo(models.User, { as: 'user', foreignKey: 'userId' });
+    UserThemePreference.belongsTo(models.Theme, { as: 'theme', foreignKey: 'themeId' });
+  };
+
   return UserThemePreference;
 };

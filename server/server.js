@@ -9,6 +9,11 @@ const passport = require('./config/passport');
 const { syncDatabase } = require('./models');
 const path = require('path');
 
+const commentRoutes = require('./routes/comments');
+const notificationRoutes = require('./routes/notifications');
+const moderatorCategoryRoutes = require('./routes/moderatorCategories');
+const userRoutes = require('./routes/users');
+
 const app = express();
 
 // Middleware
@@ -57,6 +62,12 @@ app.use('/api/orders', orderRoutes);
 
 const paymentRoutes = require('./routes/payments');
 app.use('/api/payments', paymentRoutes);
+
+app.use('/api/comments', commentRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/moderator-categories', moderatorCategoryRoutes);
+
+app.use('/api/users', userRoutes);
 
 // Sync database and start server
 const PORT = process.env.PORT || 5000;

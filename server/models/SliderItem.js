@@ -9,32 +9,33 @@ module.exports = (sequelize) => {
     },
     sliderId: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'Sliders',
+        key: 'id'
+      }
     },
     productId: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: false,
+      references: {
+        model: 'Products',
+        key: 'id'
+      }
     },
-    orderIndex: {
+    order: {
       type: DataTypes.INTEGER,
       defaultValue: 0
-    },
-    customTitle: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    customDescription: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    customImageUrl: {
-      type: DataTypes.STRING,
-      allowNull: true
     }
   }, {
-    tableName: 'slider_items',
+    tableName: 'slideritems',
     timestamps: true
   });
+
+  SliderItem.associate = (models) => {
+    SliderItem.belongsTo(models.Slider, { as: 'slider', foreignKey: 'sliderId' });
+    SliderItem.belongsTo(models.Product, { as: 'product', foreignKey: 'productId' });
+  };
 
   return SliderItem;
 };
