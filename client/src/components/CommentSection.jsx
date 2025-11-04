@@ -22,7 +22,7 @@ export default function CommentSection({ productId }) {
 
     const fetchComments = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
             console.log('🔄 Fetching comments for product:', productId);
@@ -50,7 +50,7 @@ export default function CommentSection({ productId }) {
 
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const response = await fetch('http://localhost:5000/api/comments', {
                 method: 'POST',
                 headers: {
@@ -87,7 +87,7 @@ export default function CommentSection({ productId }) {
         if (!editingComment?.content.trim()) return;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
                 method: 'PUT',
                 headers: {
@@ -114,7 +114,7 @@ export default function CommentSection({ productId }) {
         if (!window.confirm('Delete this comment?')) return;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
                 method: 'DELETE',
                 headers: {
@@ -136,7 +136,7 @@ export default function CommentSection({ productId }) {
 
     const handleVote = async (commentId, vote) => {
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const response = await fetch(`http://localhost:5000/api/comments/${commentId}/vote`, {
                 method: 'POST',
                 headers: {

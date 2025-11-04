@@ -22,7 +22,7 @@ export default function OrderManager() {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/orders/admin/all', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -44,7 +44,7 @@ export default function OrderManager() {
   const updateOrderStatus = async (orderId, newStatus) => {
     setUpdating(orderId);
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {

@@ -11,7 +11,7 @@ export default function ThemeLoader() {
   const loadTheme = async () => {
     try {
       let endpoint = 'http://localhost:5000/api/themes/default';
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
 
       // If logged in, try to get user's theme
       if (isAuthenticated() && token) {
