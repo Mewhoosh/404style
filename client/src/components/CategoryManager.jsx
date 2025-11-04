@@ -63,7 +63,7 @@ export default function CategoryManager() {
     }
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const url = editingCategory.id
         ? `http://localhost:5000/api/categories/${editingCategory.id}`
         : 'http://localhost:5000/api/categories';
@@ -102,7 +102,7 @@ export default function CategoryManager() {
     if (!deletingCategory) return;
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/categories/${deletingCategory.id}`, {
         method: 'DELETE',
         headers: {
@@ -323,3 +323,4 @@ export default function CategoryManager() {
     </div>
   );
 }
+

@@ -17,7 +17,7 @@ module.exports = (sequelize) => {
     },
     productId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true, // NULL for custom cards
       references: {
         model: 'Products',
         key: 'id'
@@ -26,6 +26,18 @@ module.exports = (sequelize) => {
     order: {
       type: DataTypes.INTEGER,
       defaultValue: 0
+    },
+    customTitle: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    customDescription: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    customImageUrl: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     tableName: 'slideritems',

@@ -1,14 +1,14 @@
 // Helper function to get auth token
-// Uses sessionStorage instead of localStorage for better privacy
-// (separate sessions for private/incognito windows)
+// Uses localStorage to persist across tabs and browser sessions
+// Token persists until explicit logout
 export const getAuthToken = () => {
-  return sessionStorage.getItem('token');
+  return localStorage.getItem('token');
 };
 
 export const setAuthToken = (token) => {
-  sessionStorage.setItem('token', token);
+  localStorage.setItem('token', token);
 };
 
 export const removeAuthToken = () => {
-  sessionStorage.removeItem('token');
+  localStorage.removeItem('token');
 };

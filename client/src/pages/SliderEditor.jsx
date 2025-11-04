@@ -86,7 +86,7 @@ export default function SliderEditor() {
 
   const fetchSlider = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/sliders/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -122,7 +122,7 @@ export default function SliderEditor() {
     }
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/sliders/${id}/items/product`, {
         method: 'POST',
         headers: {
@@ -157,7 +157,7 @@ export default function SliderEditor() {
     }
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('customTitle', customCard.title);
       formData.append('customDescription', customCard.description);
@@ -177,7 +177,9 @@ export default function SliderEditor() {
         setCustomCard({ title: '', description: '', image: null });
         fetchSlider();
       } else {
-        showToast('Failed to add custom card', 'error');
+        const errorData = await response.json();
+        console.error('Server error:', errorData);
+        showToast(errorData.message || 'Failed to add custom card', 'error');
       }
     } catch (error) {
       console.error('Add custom card error:', error);
@@ -189,7 +191,7 @@ export default function SliderEditor() {
     if (!confirm('Remove this item from slider?')) return;
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/sliders/${id}/items/${itemId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -210,6 +212,8 @@ export default function SliderEditor() {
   const handleDragEnd = async (event) => {
     const { active, over } = event;
 
+    if (!over || active.id === over.id) return;
+
     if (active.id !== over.id) {
       const oldIndex = slider.items.findIndex(item => item.id === active.id);
       const newIndex = slider.items.findIndex(item => item.id === over.id);
@@ -219,11 +223,11 @@ export default function SliderEditor() {
 
       const updatedItems = newItems.map((item, index) => ({
         id: item.id,
-        orderIndex: index
+        order: index
       }));
 
       try {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token');
         await fetch(`http://localhost:5000/api/sliders/${id}/items/reorder`, {
           method: 'PUT',
           headers: {
@@ -426,3 +430,4 @@ export default function SliderEditor() {
     </div>
   );
 }
+

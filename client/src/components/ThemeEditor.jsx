@@ -24,7 +24,7 @@ export default function ThemeEditor() {
 
   const fetchThemes = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/themes', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -76,7 +76,7 @@ export default function ThemeEditor() {
     setSaving(true);
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const url = editingTheme.id
         ? `http://localhost:5000/api/themes/${editingTheme.id}`
         : 'http://localhost:5000/api/themes';
@@ -112,7 +112,7 @@ export default function ThemeEditor() {
     if (!confirm('Are you sure you want to delete this theme?')) return;
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/themes/${themeId}`, {
         method: 'DELETE',
         headers: {
@@ -370,3 +370,4 @@ export default function ThemeEditor() {
     </div>
   );
 }
+

@@ -41,7 +41,7 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/users', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -74,7 +74,7 @@ export default function UserManagement() {
 
   const fetchAssignments = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/moderator-categories', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -92,7 +92,7 @@ export default function UserManagement() {
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/users/${userId}/role`, {
         method: 'PATCH',
         headers: {
@@ -119,7 +119,7 @@ export default function UserManagement() {
     if (!window.confirm('Delete this user? This action cannot be undone.')) return;
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
         method: 'DELETE',
         headers: {
@@ -142,7 +142,7 @@ export default function UserManagement() {
 
   const handleAssignCategories = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
 
       // Remove all existing assignments for this moderator
       const userAssignments = assignments.filter(a => a.userId === selectedUser);

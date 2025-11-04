@@ -22,7 +22,7 @@ export default function OrderManager() {
 
   const fetchOrders = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/orders/admin/all', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -44,7 +44,7 @@ export default function OrderManager() {
   const updateOrderStatus = async (orderId, newStatus) => {
     setUpdating(orderId);
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
@@ -208,15 +208,21 @@ export default function OrderManager() {
                     <div>
                       <h3 className="font-bold text-primary mb-3">Order Items</h3>
                       <div className="space-y-2">
-                        {order.items?.map(item => (
-                          <div key={item.id} className="flex gap-3 pb-2 border-b border-gray-200 last:border-0">
-                            <img
-                              src={item.product?.images?.[0]?.imageUrl 
-                                ? `http://localhost:5000${item.product.images[0].imageUrl}`
-                                : 'https://via.placeholder.com/60'}
-                              alt={item.productName}
-                              className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200"
-                            />
+                        {order.items?.map(item => {
+                          const imageUrl = item.product?.images?.[0]?.imageUrl;
+                          const fullImageUrl = imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))
+                            ? imageUrl
+                            : imageUrl 
+                              ? `http://localhost:5000${imageUrl}`
+                              : 'https://via.placeholder.com/60';
+                          
+                          return (
+                            <div key={item.id} className="flex gap-3 pb-2 border-b border-gray-200 last:border-0">
+                              <img
+                                src={fullImageUrl}
+                                alt={item.productName}
+                                className="w-16 h-16 object-cover rounded-lg border-2 border-gray-200"
+                              />
                             <div className="flex-1">
                               <p className="font-semibold text-sm">{item.productName}</p>
                               <p className="text-xs text-text-secondary">
@@ -224,7 +230,8 @@ export default function OrderManager() {
                               </p>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
 

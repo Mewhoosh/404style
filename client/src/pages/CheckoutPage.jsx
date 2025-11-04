@@ -54,7 +54,7 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       
       if (!token) {
         alert('You must be logged in to place an order');

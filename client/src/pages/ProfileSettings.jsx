@@ -19,7 +19,7 @@ export default function ProfileSettings() {
   const fetchOrders = async () => {
     setLoadingOrders(true);
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/orders', {
         headers: {
           'Authorization': `Bearer ${token}`

@@ -59,7 +59,7 @@ export default function ProductForm() {
   const fetchProduct = async () => {
     setLoading(true);
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/products/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -111,7 +111,7 @@ export default function ProductForm() {
 
   const removeExistingImage = async (imageId) => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/products/${id}/images/${imageId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -155,7 +155,7 @@ export default function ProductForm() {
         formDataToSend.append('images', img.file);
       });
 
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const url = id 
         ? `http://localhost:5000/api/products/${id}`
         : 'http://localhost:5000/api/products';
@@ -337,13 +337,18 @@ export default function ProductForm() {
 
             {(existingImages.length > 0 || newImages.length > 0) && (
               <div className="grid grid-cols-5 gap-4 mb-4">
-                {existingImages.map((img) => (
-                  <div key={img.id} className="relative group">
-                    <img
-                      src={`http://localhost:5000${img.imageUrl}`}
-                      alt="Product"
-                      className="w-full h-24 object-cover rounded-lg border-2 border-green-500"
-                    />
+                {existingImages.map((img) => {
+                  const imageUrl = img.imageUrl && (img.imageUrl.startsWith('http://') || img.imageUrl.startsWith('https://'))
+                    ? img.imageUrl
+                    : `http://localhost:5000${img.imageUrl}`;
+                  
+                  return (
+                    <div key={img.id} className="relative group">
+                      <img
+                        src={imageUrl}
+                        alt="Product"
+                        className="w-full h-24 object-cover rounded-lg border-2 border-green-500"
+                      />
                     <span className="absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded">
                       Saved
                     </span>
@@ -355,7 +360,8 @@ export default function ProductForm() {
                       <X size={14} />
                     </button>
                   </div>
-                ))}
+                  );
+                })}
 
                 {newImages.map((img, idx) => (
                   <div key={`new-${idx}`} className="relative group">

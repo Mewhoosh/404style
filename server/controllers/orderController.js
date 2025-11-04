@@ -1,4 +1,4 @@
-const { Order, OrderItem, Product, User } = require('../models');
+const { Order, OrderItem, Product, User, ProductImage } = require('../models');
 const { Op } = require('sequelize');
 const emailService = require('../services/emailService');
 
@@ -114,7 +114,18 @@ exports.getUserOrders = async (req, res) => {
         {
           model: OrderItem,
           as: 'items',
-          include: [{ model: Product, as: 'product' }]
+          include: [
+            {
+              model: Product,
+              as: 'product',
+              include: [
+                {
+                  model: ProductImage,
+                  as: 'images'
+                }
+              ]
+            }
+          ]
         }
       ],
       order: [['createdAt', 'DESC']]
@@ -135,7 +146,18 @@ exports.getOrder = async (req, res) => {
         {
           model: OrderItem,
           as: 'items',
-          include: [{ model: Product, as: 'product' }]
+          include: [
+            {
+              model: Product,
+              as: 'product',
+              include: [
+                {
+                  model: ProductImage,
+                  as: 'images'
+                }
+              ]
+            }
+          ]
         },
         {
           model: User,
@@ -176,7 +198,18 @@ exports.getAllOrders = async (req, res) => {
         {
           model: OrderItem,
           as: 'items',
-          include: [{ model: Product, as: 'product' }]
+          include: [
+            {
+              model: Product,
+              as: 'product',
+              include: [
+                {
+                  model: ProductImage,
+                  as: 'images'
+                }
+              ]
+            }
+          ]
         },
         {
           model: User,

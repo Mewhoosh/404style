@@ -19,7 +19,7 @@ export default function ThemeSelector() {
 
   const fetchThemes = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/themes', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -35,7 +35,7 @@ export default function ThemeSelector() {
 
   const fetchUserTheme = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/themes/user', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -61,7 +61,7 @@ export default function ThemeSelector() {
 
   const handleSelectTheme = async (themeId) => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       
       // Save preference
       const response = await fetch('http://localhost:5000/api/themes/user/preference', {

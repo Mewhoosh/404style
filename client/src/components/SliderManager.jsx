@@ -20,7 +20,7 @@ export default function SliderManager() {
 
   const fetchSliders = async () => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/sliders', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -44,7 +44,7 @@ export default function SliderManager() {
     }
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/sliders', {
         method: 'POST',
         headers: {
@@ -70,7 +70,7 @@ export default function SliderManager() {
 
   const handleActivateSlider = async (sliderId) => {
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/sliders/${sliderId}/activate`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -92,7 +92,7 @@ export default function SliderManager() {
     if (!confirm('Are you sure you want to delete this slider?')) return;
 
     try {
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/sliders/${sliderId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }

@@ -122,7 +122,12 @@ export default function Header() {
                         >
                           {product.images && product.images[0] ? (
                             <img
-                              src={`http://localhost:5000${product.images[0].imageUrl}`}
+                              src={
+                                product.images[0].imageUrl && 
+                                (product.images[0].imageUrl.startsWith('http://') || product.images[0].imageUrl.startsWith('https://'))
+                                  ? product.images[0].imageUrl
+                                  : `http://localhost:5000${product.images[0].imageUrl}`
+                              }
                               alt={product.name}
                               className="w-16 h-16 object-cover rounded-lg"
                             />

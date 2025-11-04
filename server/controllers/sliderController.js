@@ -69,11 +69,12 @@ exports.getActiveSlider = async (req, res) => {
       return res.json({ items: [] });
     }
 
-    // Filtruj tylko opublikowane produkty w kodzie
+    // Filtruj itemy: pokaż custom cards (bez produktu) oraz produkty z statusem 'published'
     const sliderData = slider.toJSON();
     if (sliderData.items) {
       sliderData.items = sliderData.items.filter(item =>
-        item.product && item.product.status === 'published'
+        // Pokaż jeśli: jest custom card (brak productId) LUB produkt jest opublikowany
+        !item.productId || (item.product && item.product.status === 'published')
       );
     }
 
@@ -252,15 +253,29 @@ exports.addCustomCard = async (req, res) => {
   try {
     const { customTitle, customDescription } = req.body;
     const sliderId = req.params.id;
-    const customImageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
+    // Validation
+    if (!customTitle) {
+      return res.status(400).json({ message: 'Title is required' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Image is required' });
+    }
+
+    const slider = await Slider.findByPk(sliderId);
+    if (!slider) {
+      return res.status(404).json({ message: 'Slider not found' });
+    }
+
+    const customImageUrl = `/uploads/${req.file.filename}`;
     const maxOrder = await SliderItem.max('order', { where: { sliderId } }) || 0;
 
     const item = await SliderItem.create({
       sliderId,
       order: maxOrder + 1,
       customTitle,
-      customDescription,
+      customDescription: customDescription || '',
       customImageUrl
     });
 
