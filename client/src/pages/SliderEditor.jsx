@@ -177,7 +177,9 @@ export default function SliderEditor() {
         setCustomCard({ title: '', description: '', image: null });
         fetchSlider();
       } else {
-        showToast('Failed to add custom card', 'error');
+        const errorData = await response.json();
+        console.error('Server error:', errorData);
+        showToast(errorData.message || 'Failed to add custom card', 'error');
       }
     } catch (error) {
       console.error('Add custom card error:', error);
@@ -210,6 +212,8 @@ export default function SliderEditor() {
   const handleDragEnd = async (event) => {
     const { active, over } = event;
 
+    if (!over || active.id === over.id) return;
+
     if (active.id !== over.id) {
       const oldIndex = slider.items.findIndex(item => item.id === active.id);
       const newIndex = slider.items.findIndex(item => item.id === over.id);
@@ -219,7 +223,7 @@ export default function SliderEditor() {
 
       const updatedItems = newItems.map((item, index) => ({
         id: item.id,
-        orderIndex: index
+        order: index
       }));
 
       try {
@@ -426,3 +430,4 @@ export default function SliderEditor() {
     </div>
   );
 }
+

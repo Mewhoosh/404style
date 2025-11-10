@@ -230,24 +230,31 @@ export default function ProductManager() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map(product => (
-            <div key={product.id} className="bg-white rounded-xl overflow-hidden border-2 border-gray-200 hover:border-primary transition-all">
-              <div className="relative h-48 bg-gray-100">
-                {product.images && product.images.length > 0 ? (
-                  <img
-                    src={`http://localhost:5000${product.images.find(img => img.isPrimary)?.imageUrl || product.images[0].imageUrl}`}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-text-secondary">
-                    No Image
+          {products.map(product => {
+            const primaryImage = product.images?.find(img => img.isPrimary) || product.images?.[0];
+            const imageUrl = primaryImage?.imageUrl;
+            const fullImageUrl = imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))
+              ? imageUrl
+              : `http://localhost:5000${imageUrl}`;
+
+            return (
+              <div key={product.id} className="bg-white rounded-xl overflow-hidden border-2 border-gray-200 hover:border-primary transition-all">
+                <div className="relative h-48 bg-gray-100">
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={fullImageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-text-secondary">
+                      No Image
+                    </div>
+                  )}
+                  <div className="absolute top-2 right-2">
+                    {getStatusBadge(product.status)}
                   </div>
-                )}
-                <div className="absolute top-2 right-2">
-                  {getStatusBadge(product.status)}
                 </div>
-              </div>
 
               <div className="p-4">
                 <h3 className="text-lg font-bold text-primary mb-2 line-clamp-1">
@@ -289,7 +296,8 @@ export default function ProductManager() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

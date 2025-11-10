@@ -41,5 +41,13 @@ module.exports = (sequelize) => {
     timestamps: true
   });
 
+  Product.associate = (models) => {
+    Product.belongsTo(models.Category, { as: 'category', foreignKey: 'categoryId' });
+    Product.hasMany(models.ProductImage, { as: 'images', foreignKey: 'productId' });
+    Product.belongsTo(models.User, { as: 'creator', foreignKey: 'createdBy' });
+    Product.hasMany(models.Comment, { as: 'comments', foreignKey: 'productId' });
+    Product.hasMany(models.OrderItem, { as: 'orderItems', foreignKey: 'productId' });
+  };
+
   return Product;
 };

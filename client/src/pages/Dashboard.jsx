@@ -7,11 +7,13 @@ import CategoryManager from '../components/CategoryManager';
 import ProductManager from '../components/ProductManager';
 import SliderManager from '../components/SliderManager';
 import OrderManager from '../components/OrderManager';
+import CommentModeration from '../components/CommentModeration';
+import UserManagement from '../components/UserManagement';
 
 export default function Dashboard() {
   const { user, loading, isAuthenticated } = useAuth();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(user?.role === 'moderator' ? 'reviews' : 'overview');
   const [stats, setStats] = useState({
     products: 0,
     users: 0,
@@ -35,7 +37,13 @@ export default function Dashboard() {
       }
     };
 
-    if (user) fetchStats();
+    if (user) {
+      // Set default tab for moderator
+      if (user.role === 'moderator' && activeTab === 'overview') {
+        setActiveTab('reviews');
+      }
+      fetchStats();
+    }
   }, [user]);
 
   useEffect(() => {
@@ -58,15 +66,16 @@ export default function Dashboard() {
   }
 
   const isAdmin = user?.role === 'admin';
+  const isModerator = user?.role === 'moderator';
 
-  const tabs = [
+  const tabs = isModerator ? [
+    { id: 'reviews', label: 'Reviews', icon: MessageSquare },
+  ] : [
     { id: 'overview', label: 'Overview', icon: Package },
     { id: 'products', label: 'Products', icon: Package },
-    ...(isAdmin ? [
-      { id: 'categories', label: 'Categories', icon: FolderTree },
-      { id: 'users', label: 'Users', icon: Users },
-      { id: 'colors', label: 'Site Colors', icon: Palette },
-    ] : []),
+    { id: 'categories', label: 'Categories', icon: FolderTree },
+    { id: 'users', label: 'Users', icon: Users },
+    { id: 'colors', label: 'Site Colors', icon: Palette },
     { id: 'gallery', label: 'Sliders', icon: Image },
     { id: 'reviews', label: 'Reviews', icon: MessageSquare },
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
@@ -92,11 +101,10 @@ export default function Dashboard() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-3 font-semibold whitespace-nowrap transition-all ${
-                    activeTab === tab.id
-                      ? 'text-secondary border-b-4 border-secondary'
-                      : 'text-text-secondary hover:text-primary border-b-4 border-transparent'
-                  }`}
+                  className={`flex items-center gap-2 px-6 py-3 font-semibold whitespace-nowrap transition-all ${activeTab === tab.id
+                    ? 'text-secondary border-b-4 border-secondary'
+                    : 'text-text-secondary hover:text-primary border-b-4 border-transparent'
+                    }`}
                 >
                   <Icon size={20} />
                   {tab.label}
@@ -108,7 +116,7 @@ export default function Dashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {activeTab === 'overview' && (
+        {!isModerator && activeTab === 'overview' && (
           <div>
             <div className="grid md:grid-cols-4 gap-6 mb-8">
               <div className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-primary transition-all hover:shadow-lg">
@@ -170,14 +178,14 @@ export default function Dashboard() {
                   <Package size={24} />
                   Add New Product
                 </Link>
-                <button 
+                <button
                   onClick={() => setActiveTab('gallery')}
                   className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:text-primary transition-all font-semibold"
                 >
                   <Image size={24} />
                   Manage Sliders
                 </button>
-                <button 
+                <button
                   onClick={() => setActiveTab('orders')}
                   className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:text-primary transition-all font-semibold"
                 >
@@ -189,70 +197,78 @@ export default function Dashboard() {
           </div>
         )}
 
-        {activeTab === 'products' && (
+        {!isModerator && activeTab === 'products' && (
           <div>
             <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
               <h2 className="text-2xl font-bold text-primary mb-2">Manage Products</h2>
               <p className="text-text-secondary mb-6">View, edit, and manage your products</p>
-              
+
               <ProductManager />
             </div>
           </div>
         )}
 
-        {activeTab === 'categories' && (
+        {!isModerator && activeTab === 'categories' && (
           <div>
             <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
               <h2 className="text-2xl font-bold text-primary mb-2">Manage Categories</h2>
               <p className="text-text-secondary mb-6">Organize your product categories</p>
-              
+
               <CategoryManager />
             </div>
           </div>
         )}
 
-        {activeTab === 'users' && (
-          <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
-            <h2 className="text-2xl font-bold text-primary mb-4">Manage Users & Roles</h2>
-            <p className="text-text-secondary">User management coming soon...</p>
+        {!isModerator && activeTab === 'users' && (
+          <div>
+            <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
+              <h2 className="text-2xl font-bold text-primary mb-2">User Management</h2>
+              <p className="text-text-secondary mb-6">Manage users and assign moderators to categories</p>
+
+              <UserManagement />
+            </div>
           </div>
         )}
 
-        {activeTab === 'colors' && (
+        {!isModerator && activeTab === 'colors' && (
           <div>
             <div className="bg-white rounded-xl p-8 border-2 border-gray-200 mb-6">
               <h2 className="text-2xl font-bold text-primary mb-2">Site Color Customization</h2>
               <p className="text-text-secondary mb-6">Create and manage color themes for your store</p>
-              
+
               <ThemeEditor />
             </div>
           </div>
         )}
 
-        {activeTab === 'gallery' && (
+        {!isModerator && activeTab === 'gallery' && (
           <div>
             <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
               <h2 className="text-2xl font-bold text-primary mb-2">Slider Management</h2>
               <p className="text-text-secondary mb-6">Create and manage homepage sliders</p>
-              
+
               <SliderManager />
             </div>
           </div>
         )}
 
         {activeTab === 'reviews' && (
-          <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
-            <h2 className="text-2xl font-bold text-primary mb-4">Review Management</h2>
-            <p className="text-text-secondary">Review moderation coming soon...</p>
+          <div>
+            <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
+              <h2 className="text-2xl font-bold text-primary mb-2">Comment Moderation</h2>
+              <p className="text-text-secondary mb-6">Review and moderate user comments</p>
+
+              <CommentModeration />
+            </div>
           </div>
         )}
 
-        {activeTab === 'orders' && (
+        {!isModerator && activeTab === 'orders' && (
           <div>
             <div className="bg-white rounded-xl p-8 border-2 border-gray-200">
               <h2 className="text-2xl font-bold text-primary mb-2">Order Management</h2>
               <p className="text-text-secondary mb-6">Track and manage all orders</p>
-              
+
               <OrderManager />
             </div>
           </div>

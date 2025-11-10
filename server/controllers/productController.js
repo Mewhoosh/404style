@@ -70,9 +70,12 @@ exports.getAllProducts = async (req, res) => {
       console.log('✅ Status filter:', status);
     }
 
-    // Search filter
+    // Search filter - search in name and description
     if (search) {
-      where.name = { [Op.like]: `%${search}%` };
+      where[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { description: { [Op.like]: `%${search}%` } }
+      ];
     }
 
     console.log('🎯 Final WHERE clause:', JSON.stringify(where, null, 2));

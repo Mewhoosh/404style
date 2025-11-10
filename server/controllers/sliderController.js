@@ -1,6 +1,6 @@
 const { Slider, SliderItem, Product, ProductImage } = require('../models');
 
-// Get all sliders
+// Get all sliders (admin/moderator)
 exports.getAllSliders = async (req, res) => {
   try {
     const sliders = await Slider.findAll({
@@ -12,12 +12,21 @@ exports.getAllSliders = async (req, res) => {
             {
               model: Product,
               as: 'product',
-              include: [{ model: ProductImage, as: 'images' }]
+              include: [
+                {
+                  model: ProductImage,
+                  as: 'images'
+                }
+              ]
             }
           ]
         }
       ],
-      order: [['isActive', 'DESC'], ['createdAt', 'DESC'], [{ model: SliderItem, as: 'items' }, 'orderIndex', 'ASC']]
+      order: [
+        ['isActive', 'DESC'],
+        ['createdAt', 'DESC'],
+        [{ model: SliderItem, as: 'items' }, 'order', 'ASC']
+      ]
     });
 
     res.json(sliders);
@@ -27,7 +36,7 @@ exports.getAllSliders = async (req, res) => {
   }
 };
 
-// Get active slider
+
 exports.getActiveSlider = async (req, res) => {
   try {
     const slider = await Slider.findOne({
@@ -40,19 +49,36 @@ exports.getActiveSlider = async (req, res) => {
             {
               model: Product,
               as: 'product',
-              include: [{ model: ProductImage, as: 'images' }]
+              required: false, // LEFT JOIN zamiast INNER JOIN
+              include: [
+                {
+                  model: ProductImage,
+                  as: 'images'
+                }
+              ]
             }
           ]
         }
       ],
-      order: [[{ model: SliderItem, as: 'items' }, 'orderIndex', 'ASC']]
+      order: [
+        [{ model: SliderItem, as: 'items' }, 'order', 'ASC']
+      ]
     });
 
     if (!slider) {
-      return res.status(404).json({ message: 'No active slider found' });
+      return res.json({ items: [] });
     }
 
-    res.json(slider);
+    // Filtruj itemy: pokaż custom cards (bez produktu) oraz produkty z statusem 'published'
+    const sliderData = slider.toJSON();
+    if (sliderData.items) {
+      sliderData.items = sliderData.items.filter(item =>
+        // Pokaż jeśli: jest custom card (brak productId) LUB produkt jest opublikowany
+        !item.productId || (item.product && item.product.status === 'published')
+      );
+    }
+
+    res.json(sliderData);
   } catch (error) {
     console.error('Get active slider error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -76,7 +102,7 @@ exports.getSliderById = async (req, res) => {
           ]
         }
       ],
-      order: [[{ model: SliderItem, as: 'items' }, 'orderIndex', 'ASC']]
+      order: [[{ model: SliderItem, as: 'items' }, 'order', 'ASC']]
     });
 
     if (!slider) {
@@ -90,14 +116,18 @@ exports.getSliderById = async (req, res) => {
   }
 };
 
-// Create slider
+// Create slider (admin/moderator)
 exports.createSlider = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, isActive } = req.body;
+
+    if (isActive) {
+      await Slider.update({ isActive: false }, { where: {} });
+    }
 
     const slider = await Slider.create({
       name,
-      isActive: false,
+      isActive: isActive || false,
       createdBy: req.userId
     });
 
@@ -111,16 +141,15 @@ exports.createSlider = async (req, res) => {
   }
 };
 
-// Update slider
+// Update slider (admin/moderator)
 exports.updateSlider = async (req, res) => {
   try {
+    const { name } = req.body;
     const slider = await Slider.findByPk(req.params.id);
 
     if (!slider) {
       return res.status(404).json({ message: 'Slider not found' });
     }
-
-    const { name } = req.body;
 
     await slider.update({ name });
 
@@ -157,7 +186,7 @@ exports.setActiveSlider = async (req, res) => {
   }
 };
 
-// Delete slider
+// Delete slider (admin/moderator)
 exports.deleteSlider = async (req, res) => {
   try {
     const slider = await Slider.findByPk(req.params.id);
@@ -176,23 +205,36 @@ exports.deleteSlider = async (req, res) => {
   }
 };
 
-// Add product to slider
+// Add product to slider (admin/moderator)
 exports.addProductToSlider = async (req, res) => {
   try {
     const { productId, customDescription } = req.body;
     const sliderId = req.params.id;
+
+    const slider = await Slider.findByPk(sliderId);
+    if (!slider) {
+      return res.status(404).json({ message: 'Slider not found' });
+    }
 
     const product = await Product.findByPk(productId);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const maxOrder = await SliderItem.max('orderIndex', { where: { sliderId } }) || 0;
+    const existing = await SliderItem.findOne({
+      where: { sliderId, productId }
+    });
+
+    if (existing) {
+      return res.status(400).json({ message: 'Product already in slider' });
+    }
+
+    const maxOrder = await SliderItem.max('order', { where: { sliderId } }) || 0;
 
     const item = await SliderItem.create({
       sliderId,
       productId,
-      orderIndex: maxOrder + 1,
+      order: maxOrder + 1,
       customDescription
     });
 
@@ -211,15 +253,29 @@ exports.addCustomCard = async (req, res) => {
   try {
     const { customTitle, customDescription } = req.body;
     const sliderId = req.params.id;
-    const customImageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    const maxOrder = await SliderItem.max('orderIndex', { where: { sliderId } }) || 0;
+    // Validation
+    if (!customTitle) {
+      return res.status(400).json({ message: 'Title is required' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Image is required' });
+    }
+
+    const slider = await Slider.findByPk(sliderId);
+    if (!slider) {
+      return res.status(404).json({ message: 'Slider not found' });
+    }
+
+    const customImageUrl = `/uploads/${req.file.filename}`;
+    const maxOrder = await SliderItem.max('order', { where: { sliderId } }) || 0;
 
     const item = await SliderItem.create({
       sliderId,
-      orderIndex: maxOrder + 1,
+      order: maxOrder + 1,
       customTitle,
-      customDescription,
+      customDescription: customDescription || '',
       customImageUrl
     });
 
@@ -240,7 +296,7 @@ exports.updateItemOrder = async (req, res) => {
 
     for (const item of items) {
       await SliderItem.update(
-        { orderIndex: item.orderIndex },
+        { order: item.order },
         { where: { id: item.id } }
       );
     }
@@ -252,7 +308,7 @@ exports.updateItemOrder = async (req, res) => {
   }
 };
 
-// Delete slider item
+// Delete slider item (admin/moderator)
 exports.deleteSliderItem = async (req, res) => {
   try {
     const item = await SliderItem.findByPk(req.params.itemId);

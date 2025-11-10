@@ -143,7 +143,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('savedEmail');
+    localStorage.removeItem('savedEmail'); // Email można zostawić w localStorage
     setUser(null);
     
     // Reset to default theme after logout

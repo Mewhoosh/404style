@@ -40,7 +40,8 @@ const seedProducts = async () => {
         categoryId: catMap['t-shirts'] || catMap['men'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1622445275576-721325391f1e?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -51,7 +52,8 @@ const seedProducts = async () => {
         categoryId: catMap['t-shirts'] || catMap['men'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -62,7 +64,8 @@ const seedProducts = async () => {
         categoryId: catMap['t-shirts'] || catMap['men'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -75,7 +78,8 @@ const seedProducts = async () => {
         categoryId: catMap['jeans'] || catMap['men'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1602293589930-45aad59ba3ab?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -86,7 +90,8 @@ const seedProducts = async () => {
         categoryId: catMap['jeans'] || catMap['men'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -97,7 +102,8 @@ const seedProducts = async () => {
         categoryId: catMap['jeans'] || catMap['men'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1604176354204-9268737828e4?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -110,7 +116,8 @@ const seedProducts = async () => {
         categoryId: catMap['jackets'] || catMap['men'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80', iPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -121,7 +128,8 @@ const seedProducts = async () => {
         categoryId: catMap['jackets'] || catMap['men'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1576871337622-98d48d1cf531?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1576871337622-98d48d1cf531?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -134,7 +142,8 @@ const seedProducts = async () => {
         categoryId: catMap['dresses'] || catMap['women'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -145,7 +154,8 @@ const seedProducts = async () => {
         categoryId: catMap['dresses'] || catMap['women'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -156,7 +166,8 @@ const seedProducts = async () => {
         categoryId: catMap['dresses'] || catMap['women'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -169,7 +180,8 @@ const seedProducts = async () => {
         categoryId: catMap['tops'] || catMap['women'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -180,7 +192,8 @@ const seedProducts = async () => {
         categoryId: catMap['tops'] || catMap['women'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -193,7 +206,8 @@ const seedProducts = async () => {
         categoryId: catMap['skirts'] || catMap['women'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -204,7 +218,8 @@ const seedProducts = async () => {
         categoryId: catMap['skirts'] || catMap['women'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1594633313593-bab3825d0caf?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1594633313593-bab3825d0caf?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1583496661160-251b32cc5384?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -217,7 +232,8 @@ const seedProducts = async () => {
         categoryId: catMap['bags'] || catMap['accessories'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1564422167509-4f7d0fbb5ea7?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -228,7 +244,8 @@ const seedProducts = async () => {
         categoryId: catMap['bags'] || catMap['accessories'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -241,7 +258,8 @@ const seedProducts = async () => {
         categoryId: catMap['watches'] || catMap['accessories'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -252,7 +270,8 @@ const seedProducts = async () => {
         categoryId: catMap['watches'] || catMap['accessories'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1533139502658-0198f920d8e8?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -265,7 +284,8 @@ const seedProducts = async () => {
         categoryId: catMap['sunglasses'] || catMap['accessories'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -276,7 +296,8 @@ const seedProducts = async () => {
         categoryId: catMap['sunglasses'] || catMap['accessories'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -289,7 +310,8 @@ const seedProducts = async () => {
         categoryId: catMap['sneakers'] || catMap['footwear'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -300,7 +322,8 @@ const seedProducts = async () => {
         categoryId: catMap['sneakers'] || catMap['footwear'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -313,7 +336,8 @@ const seedProducts = async () => {
         categoryId: catMap['boots'] || catMap['footwear'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1605812860427-4024433a70fd?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -324,7 +348,8 @@ const seedProducts = async () => {
         categoryId: catMap['boots'] || catMap['footwear'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=1200&q=90', isPrimary: false }
         ]
       },
 
@@ -337,7 +362,8 @@ const seedProducts = async () => {
         categoryId: catMap['sandals'] || catMap['footwear'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1602293589930-45aad59ba3ab?w=1200&q=90', isPrimary: false }
         ]
       },
       {
@@ -348,7 +374,8 @@ const seedProducts = async () => {
         categoryId: catMap['sandals'] || catMap['footwear'] || fallbackCategoryId,
         status: 'published',
         images: [
-          { imageUrl: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&q=80', isPrimary: true }
+          { imageUrl: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=1200&q=90', isPrimary: true },
+          { imageUrl: 'https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?w=1200&q=90', isPrimary: false }
         ]
       }
     ];

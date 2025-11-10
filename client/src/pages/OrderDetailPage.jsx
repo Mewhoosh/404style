@@ -201,15 +201,21 @@ export default function OrderDetailPage() {
             <div className="bg-white rounded-xl p-4 md:p-6 border-2 border-gray-200">
               <h2 className="text-xl font-bold text-primary mb-4">Order Items</h2>
               <div className="space-y-4">
-                {order.items?.map(item => (
-                  <div key={item.id} className="flex gap-4 pb-4 border-b-2 border-gray-100 last:border-0">
-                    <img
-                      src={item.product?.images?.[0]?.imageUrl 
-                        ? `http://localhost:5000${item.product.images[0].imageUrl}`
-                        : 'https://via.placeholder.com/100'}
-                      alt={item.productName}
-                      className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-lg flex-shrink-0 border-2 border-gray-200"
-                    />
+                {order.items?.map(item => {
+                  const imageUrl = item.product?.images?.[0]?.imageUrl;
+                  const fullImageUrl = imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))
+                    ? imageUrl
+                    : imageUrl 
+                      ? `http://localhost:5000${imageUrl}`
+                      : 'https://via.placeholder.com/100';
+                  
+                  return (
+                    <div key={item.id} className="flex gap-4 pb-4 border-b-2 border-gray-100 last:border-0">
+                      <img
+                        src={fullImageUrl}
+                        alt={item.productName}
+                        className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-lg flex-shrink-0 border-2 border-gray-200"
+                      />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-primary mb-2 line-clamp-2">{item.productName}</h3>
                       <div className="text-sm text-text-secondary mb-2 space-y-1">
@@ -221,7 +227,8 @@ export default function OrderDetailPage() {
                       </p>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

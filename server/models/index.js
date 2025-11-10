@@ -24,34 +24,35 @@ const Slider = require('./Slider')(sequelize);
 const SliderItem = require('./SliderItem')(sequelize);
 const Order = require('./Order')(sequelize);
 const OrderItem = require('./OrderItem')(sequelize);
+const Comment = require('./Comment')(sequelize, Sequelize.DataTypes);
+const CommentVote = require('./CommentVote')(sequelize, Sequelize.DataTypes);
+const Notification = require('./Notification')(sequelize, Sequelize.DataTypes);
+const ModeratorCategory = require('./ModeratorCategory')(sequelize, Sequelize.DataTypes);
 
-// Define relationships
-Category.hasMany(Category, { as: 'children', foreignKey: 'parentId' });
-Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
+// Collect all models
+const models = {
+  User,
+  Category,
+  Product,
+  ProductImage,
+  Theme,
+  UserThemePreference,
+  Slider,
+  SliderItem,
+  Order,
+  OrderItem,
+  Comment,
+  CommentVote,
+  Notification,
+  ModeratorCategory
+};
 
-Product.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
-Product.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
-Product.hasMany(ProductImage, { foreignKey: 'productId', as: 'images' });
-ProductImage.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
-
-User.hasOne(UserThemePreference, { foreignKey: 'userId', as: 'themePreference' });
-UserThemePreference.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-UserThemePreference.belongsTo(Theme, { foreignKey: 'themeId', as: 'theme' });
-
-Slider.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
-Slider.hasMany(SliderItem, { foreignKey: 'sliderId', as: 'items' });
-SliderItem.belongsTo(Slider, { foreignKey: 'sliderId', as: 'slider' });
-SliderItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
-
-// Order relationships
-Order.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-User.hasMany(Order, { foreignKey: 'userId', as: 'orders' });
-
-Order.hasMany(OrderItem, { foreignKey: 'orderId', as: 'items' });
-OrderItem.belongsTo(Order, { foreignKey: 'orderId', as: 'order' });
-
-OrderItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
-Product.hasMany(OrderItem, { foreignKey: 'productId', as: 'orderItems' });
+// Initialize associations
+Object.keys(models).forEach(modelName => {
+  if (models[modelName].associate) {
+    models[modelName].associate(models);
+  }
+});
 
 // Sync database
 const syncDatabase = async () => {
@@ -65,15 +66,6 @@ const syncDatabase = async () => {
 
 module.exports = {
   sequelize,
-  User,
-  Category,
-  Product,
-  ProductImage,
-  Theme,
-  UserThemePreference,
-  Slider,
-  SliderItem,
-  Order,
-  OrderItem,
+  ...models,
   syncDatabase
 };

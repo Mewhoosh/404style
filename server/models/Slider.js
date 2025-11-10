@@ -24,5 +24,10 @@ module.exports = (sequelize) => {
     timestamps: true
   });
 
+  Slider.associate = (models) => {
+    Slider.belongsTo(models.User, { as: 'creator', foreignKey: 'createdBy' });
+    Slider.hasMany(models.SliderItem, { as: 'items', foreignKey: 'sliderId' });
+  };
+
   return Slider;
 };

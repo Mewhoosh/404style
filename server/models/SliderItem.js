@@ -9,13 +9,21 @@ module.exports = (sequelize) => {
     },
     sliderId: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'Sliders',
+        key: 'id'
+      }
     },
     productId: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true, // NULL for custom cards
+      references: {
+        model: 'Products',
+        key: 'id'
+      }
     },
-    orderIndex: {
+    order: {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },
@@ -32,9 +40,14 @@ module.exports = (sequelize) => {
       allowNull: true
     }
   }, {
-    tableName: 'slider_items',
+    tableName: 'slideritems',
     timestamps: true
   });
+
+  SliderItem.associate = (models) => {
+    SliderItem.belongsTo(models.Slider, { as: 'slider', foreignKey: 'sliderId' });
+    SliderItem.belongsTo(models.Product, { as: 'product', foreignKey: 'productId' });
+  };
 
   return SliderItem;
 };
