@@ -5,6 +5,7 @@ node_modules/
 # Environment variables
 .env
 */.env
+.env.local
 
 # Build files
 */dist/
@@ -13,6 +14,8 @@ node_modules/
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # OS files
 .DS_Store
@@ -27,6 +30,15 @@ Thumbs.db
 # Database
 *.sql
 *.sqlite
+*.db
 
-
+# Uploads (user-generated content)
 */uploads/
+uploads/
+
+# Seed files (zawierają testowe dane)
+server/seed*.js
+seedUsers.js
+seedProducts.js
+seedCategories.js
+seedDefaultTheme.js

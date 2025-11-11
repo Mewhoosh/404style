@@ -51,14 +51,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
           return done(null, user);
         } catch (error) {
-          console.error('Google OAuth error:', error);
           return done(error, null);
         }
       }
     )
   );
-} else {
-  console.log('⚠️  Google OAuth not configured (missing credentials in .env)');
 }
 
 // GitHub Strategy
@@ -103,14 +100,11 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
 
           return done(null, user);
         } catch (error) {
-          console.error('GitHub OAuth error:', error);
           return done(error, null);
         }
       }
     )
   );
-} else {
-  console.log('⚠️  GitHub OAuth not configured (missing credentials in .env)');
 }
 
 module.exports = passport;

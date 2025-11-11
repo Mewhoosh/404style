@@ -105,8 +105,6 @@ exports.handleWebhook = async (req, res) => {
     if (order) {
       await emailService.sendPaymentConfirmation(order);
     }
-
-    console.log(`Order ${orderId} paid successfully`);
   }
 
   res.json({ received: true });

@@ -113,6 +113,10 @@ exports.getProductComments = async (req, res) => {
         const { productId } = req.params;
         const userId = req.userId;
         const userRole = req.userRole;
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
 
         console.log('🔍 Fetching comments - User ID:', userId, 'Role:', userRole, 'Product:', productId);
 
@@ -132,7 +136,7 @@ exports.getProductComments = async (req, res) => {
         }
         // Admin and moderator see all
 
-        const comments = await Comment.findAll({
+        const { count, rows: comments } = await Comment.findAndCountAll({
             where: whereClause,
             include: [
                 {
@@ -156,7 +160,9 @@ exports.getProductComments = async (req, res) => {
                     as: 'votes'
                 }
             ],
-            order: [['createdAt', 'DESC']]
+            order: [['createdAt', 'DESC']],
+            limit,
+            offset
         });
 
         console.log('💬 Raw comments found:', comments.length);
@@ -194,7 +200,17 @@ exports.getProductComments = async (req, res) => {
             return commentData;
         });
 
-        res.json(finalComments);
+        const totalPages = Math.ceil(count / limit);
+
+        res.json({
+            comments: finalComments,
+            pagination: {
+                page,
+                limit,
+                total: count,
+                totalPages
+            }
+        });
     } catch (error) {
         console.error('Get comments error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });

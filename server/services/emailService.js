@@ -102,7 +102,6 @@ const sendOrderConfirmation = async (order) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Order confirmation email sent to ${order.shippingEmail}`);
   } catch (error) {
     console.error('Failed to send order confirmation email:', error);
   }
@@ -158,7 +157,6 @@ const sendPaymentConfirmation = async (order) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Payment confirmation email sent to ${order.shippingEmail}`);
   } catch (error) {
     console.error('Failed to send payment confirmation email:', error);
   }
@@ -222,7 +220,6 @@ const sendShippingNotification = async (order) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Shipping notification sent to ${order.shippingEmail}`);
   } catch (error) {
     console.error('Failed to send shipping notification:', error);
   }
@@ -279,7 +276,6 @@ const sendDeliveryConfirmation = async (order) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Delivery confirmation sent to ${order.shippingEmail}`);
   } catch (error) {
     console.error('Failed to send delivery confirmation:', error);
   }

@@ -53,21 +53,18 @@ const getAllSubcategoryIds = async (categoryId) => {
 exports.getAllProducts = async (req, res) => {
   try {
     const { categoryId, status, search } = req.query;
-    console.log('🔍 Query params:', { categoryId, status, search });
     
     const where = {};
 
     // Category filter - include subcategories
     if (categoryId) {
       const categoryIds = await getAllSubcategoryIds(parseInt(categoryId));
-      console.log('📁 Category IDs (with subcategories):', categoryIds);
       where.categoryId = { [Op.in]: categoryIds };
     }
 
     // Status filter
     if (status) {
       where.status = status;
-      console.log('✅ Status filter:', status);
     }
 
     // Search filter - search in name and description
@@ -77,8 +74,6 @@ exports.getAllProducts = async (req, res) => {
         { description: { [Op.like]: `%${search}%` } }
       ];
     }
-
-    console.log('🎯 Final WHERE clause:', JSON.stringify(where, null, 2));
 
     const products = await Product.findAll({
       where,
@@ -90,7 +85,6 @@ exports.getAllProducts = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
-    console.log('📦 Products found:', products.length);
     res.json(products);
   } catch (error) {
     console.error('Get products error:', error);
