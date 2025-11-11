@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ThumbsUp, ThumbsDown, Send, Edit2, Trash2, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Send, Edit2, Trash2, Clock, CheckCircle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Toast from './Toast';
 
@@ -11,10 +11,14 @@ export default function CommentSection({ productId }) {
     const [loading, setLoading] = useState(false);
     const [replyingTo, setReplyingTo] = useState(null);
     const [toast, setToast] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
+    const commentsPerPage = 5;
 
     useEffect(() => {
         fetchComments();
-    }, [productId]);
+    }, [productId, currentPage]);
 
     const showToast = (message, type = 'success') => {
         setToast({ message, type });
@@ -28,14 +32,16 @@ export default function CommentSection({ productId }) {
             console.log('🔄 Fetching comments for product:', productId);
             console.log('🔑 Token:', token ? 'Present' : 'None');
 
-            const response = await fetch(`http://localhost:5000/api/comments/product/${productId}`, {
+            const response = await fetch(`http://localhost:5000/api/comments/product/${productId}?page=${currentPage}&limit=${commentsPerPage}`, {
                 headers
             });
 
             if (response.ok) {
                 const data = await response.json();
                 console.log('Comments received:', data);
-                setComments(data);
+                setComments(data.comments || []);
+                setTotalPages(data.pagination?.totalPages || 1);
+                setTotal(data.pagination?.total || 0);
             } else {
                 console.error('Failed to fetch comments:', response.status);
             }
@@ -69,6 +75,7 @@ export default function CommentSection({ productId }) {
                 console.log('Comment created:', result);
                 setNewComment('');
                 setReplyingTo(null);
+                setCurrentPage(1);
                 await fetchComments();
                 showToast('Comment submitted for moderation!', 'success');
             } else {
@@ -377,7 +384,50 @@ export default function CommentSection({ productId }) {
                     {comments.length === 0 ? (
                         <p className="text-center text-text-secondary py-8">No comments yet. Be the first to comment!</p>
                     ) : (
-                        comments.map(comment => renderComment(comment))
+                        <>
+                            {comments.map(comment => renderComment(comment))}
+                            
+                            {totalPages > 1 && (
+                                <div className="flex items-center justify-between mt-8 pt-6 border-t-2 border-gray-200">
+                                    <div className="text-sm text-text-secondary">
+                                        Showing page {currentPage} of {totalPages} ({total} total comments)
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                            disabled={currentPage === 1}
+                                            className="flex items-center gap-1 px-4 py-2 bg-white border-2 border-gray-200 rounded-lg font-bold hover:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            <ChevronLeft size={18} />
+                                            Previous
+                                        </button>
+                                        <div className="flex gap-1">
+                                            {[...Array(totalPages)].map((_, i) => (
+                                                <button
+                                                    key={i + 1}
+                                                    onClick={() => setCurrentPage(i + 1)}
+                                                    className={`w-10 h-10 rounded-lg font-bold transition-colors ${
+                                                        currentPage === i + 1
+                                                            ? 'bg-secondary text-primary'
+                                                            : 'bg-white border-2 border-gray-200 hover:border-secondary'
+                                                    }`}
+                                                >
+                                                    {i + 1}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button
+                                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                            disabled={currentPage === totalPages}
+                                            className="flex items-center gap-1 px-4 py-2 bg-white border-2 border-gray-200 rounded-lg font-bold hover:border-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            Next
+                                            <ChevronRight size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
