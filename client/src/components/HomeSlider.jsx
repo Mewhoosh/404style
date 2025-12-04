@@ -122,7 +122,7 @@ export default function HomeSlider() {
             </>
           )}
 
-          <div className={`grid gap-6 ${getGridClass()}`}>
+          <div className={`grid gap-6 ${getGridClass()} items-stretch`}>
             {visibleItems.map((item, idx) => {
               const imageUrl = getImageUrl(
                 item.customImageUrl || item.product?.images?.[0]?.imageUrl
@@ -135,9 +135,9 @@ export default function HomeSlider() {
               return (
                 <div
                   key={`${item.id}-${idx}`}
-                  className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-gray-200 flex flex-col"
+                  className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-gray-200 flex flex-col h-full"
                 >
-                  {/* FIX #2: Stała wysokość obrazka */}
+                  {/* Stała wysokość obrazka */}
                   <div className="h-64 overflow-hidden flex-shrink-0">
                     <img
                       src={imageUrl}
@@ -146,12 +146,12 @@ export default function HomeSlider() {
                     />
                   </div>
                   
-                  {/* FIX #2: Flex-grow pozwala content rosnąć, max-height + overflow kontroluje wysokość */}
+                  {/* Treść bez ograniczenia wysokości - rozciąga się naturalnie */}
                   <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="text-xl font-bold text-primary mb-2 line-clamp-2">{title}</h3>
+                    <h3 className="text-xl font-bold text-primary mb-2">{title}</h3>
                     
-                    {/* FIX #1: Usunięto line-clamp-3, dodano max-height + overflow-y-auto dla scrollowania */}
-                    <div className="text-text-secondary mb-4 flex-grow overflow-y-auto max-h-32">
+                    {/* Opis bez line-clamp i bez max-height - pełna długość */}
+                    <div className="text-text-secondary mb-4 flex-grow">
                       <p className="whitespace-pre-wrap">{description}</p>
                     </div>
                     
