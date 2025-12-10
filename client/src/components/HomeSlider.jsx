@@ -150,10 +150,11 @@ export default function HomeSlider() {
                   <div className="p-6 flex flex-col flex-grow">
                     <h3 className="text-xl font-bold text-primary mb-2">{title}</h3>
                     
-                    {/* Opis bez line-clamp i bez max-height - pełna długość */}
-                    <div className="text-text-secondary mb-4 flex-grow">
-                      <p className="whitespace-pre-wrap">{description}</p>
-                    </div>
+                    {/* Opis z renderowaniem HTML */}
+                    <div 
+                      className="text-text-secondary mb-4 flex-grow prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: description }}
+                    />
                     
                     {price && (
                       <p className="text-2xl font-black text-secondary mb-2">${parseFloat(price).toFixed(2)}</p>

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Upload, X, Save, ArrowLeft, Loader } from 'lucide-react';
+import { Upload, X, Save, ArrowLeft, Loader, Bold, Italic, Underline, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
 import Toast from '../components/Toast';
 
 export default function ProductForm() {
@@ -20,6 +20,7 @@ export default function ProductForm() {
     categoryId: '',
     status: 'draft'
   });
+  const editorRef = useRef(null);
 
   useEffect(() => {
     fetchCategories();
@@ -27,6 +28,13 @@ export default function ProductForm() {
       fetchProduct();
     }
   }, [id]);
+
+  useEffect(() => {
+    // Update editor content when description changes
+    if (editorRef.current && formData.description !== editorRef.current.innerHTML) {
+      editorRef.current.innerHTML = formData.description;
+    }
+  }, [formData.description]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -91,6 +99,32 @@ export default function ProductForm() {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleDescriptionChange = (e) => {
+    setFormData({
+      ...formData,
+      description: e.currentTarget.innerHTML
+    });
+  };
+
+  const execCommand = (command, value = null) => {
+    document.execCommand(command, false, value);
+    if (editorRef.current) {
+      editorRef.current.focus();
+      // Trigger onChange after command
+      setFormData(prev => ({
+        ...prev,
+        description: editorRef.current.innerHTML
+      }));
+    }
+  };
+
+  const insertLink = () => {
+    const url = prompt('Enter URL:');
+    if (url) {
+      execCommand('createLink', url);
+    }
   };
 
   const handleImageUpload = (e) => {
@@ -319,14 +353,96 @@ export default function ProductForm() {
             <label className="block text-sm font-semibold text-primary mb-2">
               Description
             </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-secondary focus:outline-none transition-all"
-              rows="5"
-              placeholder="Product description..."
-            ></textarea>
+            <div className="border-2 border-gray-200 rounded-xl overflow-hidden">
+              {/* Toolbar */}
+              <div className="bg-gray-50 border-b-2 border-gray-200 p-2 flex gap-1 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => execCommand('bold')}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  title="Bold"
+                >
+                  <Bold size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => execCommand('italic')}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  title="Italic"
+                >
+                  <Italic size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => execCommand('underline')}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  title="Underline"
+                >
+                  <Underline size={18} />
+                </button>
+                <div className="w-px bg-gray-300 mx-1"></div>
+                <button
+                  type="button"
+                  onClick={() => execCommand('insertUnorderedList')}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  title="Bullet List"
+                >
+                  <List size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => execCommand('insertOrderedList')}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  title="Numbered List"
+                >
+                  <ListOrdered size={18} />
+                </button>
+                <div className="w-px bg-gray-300 mx-1"></div>
+                <button
+                  type="button"
+                  onClick={insertLink}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                  title="Insert Link"
+                >
+                  <LinkIcon size={18} />
+                </button>
+                <div className="w-px bg-gray-300 mx-1"></div>
+                <button
+                  type="button"
+                  onClick={() => execCommand('formatBlock', 'h2')}
+                  className="px-3 py-1 hover:bg-gray-200 rounded transition-colors text-sm font-semibold"
+                  title="Heading 2"
+                >
+                  H2
+                </button>
+                <button
+                  type="button"
+                  onClick={() => execCommand('formatBlock', 'h3')}
+                  className="px-3 py-1 hover:bg-gray-200 rounded transition-colors text-sm font-semibold"
+                  title="Heading 3"
+                >
+                  H3
+                </button>
+                <button
+                  type="button"
+                  onClick={() => execCommand('formatBlock', 'p')}
+                  className="px-3 py-1 hover:bg-gray-200 rounded transition-colors text-sm"
+                  title="Paragraph"
+                >
+                  P
+                </button>
+              </div>
+              {/* Editor */}
+              <div
+                ref={editorRef}
+                contentEditable
+                onInput={handleDescriptionChange}
+                onBlur={handleDescriptionChange}
+                suppressContentEditableWarning
+                className="min-h-[200px] p-4 focus:outline-none prose prose-sm max-w-none bg-white"
+                data-placeholder="Product description..."
+              />
+            </div>
           </div>
 
           {/* Images */}
